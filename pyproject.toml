@@ -16,11 +16,6 @@ dependencies = [
   "fastapi",
   "typer",
   "uvicorn",
-  # Database Libraries
-  "alembic",
-  "pgvector",
-  "psycopg2-binary",
-  "sqlalchemy",
   # Project Libraries
   "openai",
   "requests",

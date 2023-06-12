@@ -16,13 +16,11 @@ ws_settings = WorkspaceSettings(
     dev_app_enabled=True,
     dev_api_enabled=True,
     dev_jupyter_enabled=True,
-    dev_db_enabled=False,
     # -*- Production settings
     prd_env="prd",
     # -*- Production Apps
     prd_app_enabled=True,
     prd_api_enabled=True,
-    prd_db_enabled=False,
     # -*- AWS settings
     # Region for AWS resources
     aws_region="us-east-2",

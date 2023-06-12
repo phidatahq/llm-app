@@ -1,0 +1,93 @@
+[project]
+name = "llm"
+version = "0.1.0"
+requires-python = ">3.7"
+readme = "README.md"
+authors = [
+  {name = "Team", email = "team@team.com"}
+]
+
+dependencies = [
+  # Libraries for data processing
+  "pandas",
+  "polars",
+  "duckdb",
+  # Libraries for Api server
+  "fastapi",
+  "typer",
+  "uvicorn",
+  # Database Libraries
+  "alembic",
+  "pgvector",
+  "psycopg2-binary",
+  "sqlalchemy",
+  # Project Libraries
+  "openai",
+  "requests",
+  "scipy",
+  "termcolor",
+  "tiktoken",
+  "textract",
+  "langchain",
+  "streamlit",
+  "streamlit-chat",
+  # Formatting
+  "black",
+  # Type checking
+  "mypy",
+  # Pre-commit hooks
+  "pre-commit",
+  # Testing
+  "pytest",
+  # Linting
+  "ruff",
+  # phidata
+  "phidata==1.7.0",
+  # Pin for dependency resolution
+  "cryptography==39.0.2",
+]
+
+[project.scripts]
+api = "api.cli:cli"
+app = "app.cli:cli"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["api", "app", "db", "notebooks","tests", "utils", "workspace"]
+
+# Change this value to use a different directory for the phidata workspace.
+# [tool.phidata]
+# workspace = "workspace"
+
+[tool.ruff]
+line-length = 110
+exclude = [
+  "llmenv*",
+  ".venv*",
+]
+
+[tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_configs = true
+exclude = [
+  "llmenv*",
+  ".venv*",
+]
+
+[[tool.mypy.overrides]]
+module = [
+  "pandas.*",
+  "phidata.*",
+  "pyarrow.*",
+  "langchain.*",
+  "setuptools.*",
+  "streamlit_chat.*",
+]
+ignore_missing_imports = true

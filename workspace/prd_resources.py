@@ -125,6 +125,8 @@ prd_streamlit = StreamlitApp(
     save_output=save_output,
     # Do not wait for the service to stabilize
     wait_for_creation=False,
+    # Do not wait for the service to be deleted
+    wait_for_deletion=False,
     # Uncomment to read secrets from secrets/prd_app_secrets.yml
     # secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/prd_app_secrets.yml"),
 )
@@ -148,6 +150,8 @@ prd_fastapi = FastApiServer(
     use_cache=ws_settings.use_cache,
     skip_delete=skip_delete,
     save_output=save_output,
+    # Do not wait for the service to stabilize
+    wait_for_creation=False,
     # Uncomment to read secrets from secrets/prd_app_secrets.yml
     # secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/prd_app_secrets.yml"),
 )

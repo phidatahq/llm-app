@@ -27,7 +27,7 @@ ws_settings = WorkspaceSettings(
     # Availability Zones for AWS resources
     aws_az1="us-east-2a",
     aws_az2="us-east-2b",
-    # Subnet IDs for AWS resources
+    # Subnet IDs in the aws_region
     # subnet_ids=None,
     # -*- Image Settings
     # Repository for images

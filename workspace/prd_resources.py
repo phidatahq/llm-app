@@ -12,7 +12,6 @@ from phidata.aws.resource.group import (
     InboundRule,
 )
 from phidata.docker.config import DockerConfig, DockerImage
-from phidata.resource.reference import Reference
 
 from workspace.settings import ws_settings
 
@@ -45,14 +44,6 @@ prd_data_s3_bucket = S3Bucket(
     save_output=save_output,
 )
 
-# -*- Secrets for production database
-prd_db_secret = SecretsManager(
-    name=f"{ws_settings.prd_key}-db-secret",
-    # Create secret from workspace/secrets/prd_db_secrets.yml
-    secret_files=[ws_settings.ws_root.joinpath("workspace/secrets/prd_db_secrets.yml")],
-    skip_delete=skip_delete,
-    save_output=save_output,
-)
 # -*- Secrets for production application
 prd_app_secret = SecretsManager(
     name=f"{ws_settings.prd_key}-app-secret",
@@ -168,7 +159,7 @@ prd_aws_config = AwsConfig(
     env=ws_settings.prd_env,
     apps=[prd_streamlit, prd_fastapi],
     resources=AwsResourceGroup(
-        secrets=[prd_db_secret, prd_app_secret],
+        secrets=[prd_app_secret],
         security_groups=[prd_app_security_group],
         s3_buckets=[prd_data_s3_bucket],
     ),

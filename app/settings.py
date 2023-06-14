@@ -2,7 +2,7 @@ from pydantic import BaseSettings
 
 
 class AppSettings(BaseSettings):
-    """App settings that can be derived using environment variables.
+    """App settings that can be derived from environment variables.
 
     Reference: https://pydantic-docs.helpmanual.io/usage/settings/
     """

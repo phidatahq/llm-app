@@ -12,6 +12,7 @@ from phidata.aws.resource.group import (
     InboundRule,
 )
 from phidata.docker.config import DockerConfig, DockerImage
+from phidata.resource.reference import AwsReference
 
 from workspace.settings import ws_settings
 
@@ -22,6 +23,8 @@ from workspace.settings import ws_settings
 skip_delete: bool = False
 # Save resource outputs to workspace/outputs
 save_output: bool = True
+# Create load balancer for the application
+create_load_balancer: bool = True
 
 # -*- Production Image
 prd_image = DockerImage(
@@ -55,11 +58,11 @@ prd_app_secret = SecretsManager(
     save_output=save_output,
 )
 
-# -*- Security Group for the application
-prd_app_security_group = SecurityGroup(
-    name=f"{ws_settings.prd_key}-security-group",
-    enabled=ws_settings.prd_api_enabled or ws_settings.prd_app_enabled,
-    description="Security group for the production application",
+# -*- Security Group for the load balancer
+prd_lb_sg = SecurityGroup(
+    name=f"{ws_settings.prd_key}-lb-security-group",
+    enabled=create_load_balancer,
+    description="Security group for the load balancer",
     inbound_rules=[
         InboundRule(
             description="Allow HTTP traffic from the internet",
@@ -71,17 +74,28 @@ prd_app_security_group = SecurityGroup(
             port=443,
             cidr_ip="0.0.0.0/0",
         ),
+    ],
+    skip_delete=skip_delete,
+    save_output=save_output,
+)
+# -*- Security Group for the application
+prd_app_sg = SecurityGroup(
+    name=f"{ws_settings.prd_key}-app-security-group",
+    enabled=ws_settings.prd_api_enabled or ws_settings.prd_app_enabled,
+    description="Security group for the production application",
+    inbound_rules=[
         InboundRule(
-            description="Allow traffic to the FastAPI server",
+            description="Allow traffic from LB to the FastAPI server",
             port=9090,
-            cidr_ip="0.0.0.0/0",
+            source_security_group_id=AwsReference(prd_lb_sg.get_security_group_id),
         ),
         InboundRule(
-            description="Allow traffic to the Streamlit app",
+            description="Allow traffic from LB to the Streamlit app",
             port=9095,
-            cidr_ip="0.0.0.0/0",
+            source_security_group_id=AwsReference(prd_lb_sg.get_security_group_id),
         ),
     ],
+    depends_on=[prd_lb_sg],
     skip_delete=skip_delete,
     save_output=save_output,
 )
@@ -102,13 +116,14 @@ prd_streamlit = StreamlitApp(
     enabled=ws_settings.prd_app_enabled,
     image=prd_image,
     command=["app", "start", "Home"],
-    ecs_task_cpu="1024",
-    ecs_task_memory="2048",
+    ecs_task_cpu="2048",
+    ecs_task_memory="4096",
     ecs_cluster=prd_ecs_cluster,
     aws_subnets=ws_settings.subnet_ids,
     aws_secrets=[prd_app_secret],
-    aws_security_groups=[prd_app_security_group],
-    create_load_balancer=True,
+    aws_security_groups=[prd_app_sg],
+    load_balancer_security_groups=[prd_lb_sg],
+    create_load_balancer=create_load_balancer,
     # Get the OpenAI API key from the local environment
     env={"OPENAI_API_KEY": getenv("OPENAI_API_KEY", None)},
     use_cache=ws_settings.use_cache,
@@ -133,8 +148,8 @@ prd_fastapi = FastApiServer(
     ecs_cluster=prd_ecs_cluster,
     aws_subnets=ws_settings.subnet_ids,
     aws_secrets=[prd_app_secret],
-    aws_security_groups=[prd_app_security_group],
-    create_load_balancer=True,
+    load_balancer_security_groups=[prd_lb_sg],
+    create_load_balancer=create_load_balancer,
     health_check_path="/v1/ping",
     # Get the OpenAI API key from the local environment
     env={"OPENAI_API_KEY": getenv("OPENAI_API_KEY", None)},
@@ -160,7 +175,7 @@ prd_aws_config = AwsConfig(
     apps=[prd_streamlit, prd_fastapi],
     resources=AwsResourceGroup(
         secrets=[prd_app_secret],
-        security_groups=[prd_app_security_group],
+        security_groups=[prd_lb_sg, prd_app_sg],
         s3_buckets=[prd_data_s3_bucket],
     ),
 )

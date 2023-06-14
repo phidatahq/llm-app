@@ -25,7 +25,7 @@ cloud_sql_proxy
 .venv
 venv*
 aienv*
-aienv*
+llmenv*
 
 .ipynb_checkpoints
 

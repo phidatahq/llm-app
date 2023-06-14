@@ -4,7 +4,7 @@ from pydantic import BaseSettings, validator
 
 
 class ApiSettings(BaseSettings):
-    """Api settings that can be derived using environment variables.
+    """Api settings that can be derived from environment variables.
 
     Reference: https://pydantic-docs.helpmanual.io/usage/settings/
     """
@@ -16,9 +16,6 @@ class ApiSettings(BaseSettings):
     # Api runtime_env derived from the `runtime_env` environment variable.
     # Valid values include "dev", "stg", "prd"
     runtime_env: str = "dev"
-
-    # Api secret key derived from the `secret_key` environment variable.
-    secret_key: Optional[str] = None
 
     # Set to False to disable docs server at /docs and /redoc
     docs_enabled: bool = True

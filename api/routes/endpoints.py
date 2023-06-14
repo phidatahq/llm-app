@@ -3,9 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ApiEndpoints:
-    AGENT: str = "/agent"
-    CHAT: str = "/chat"
-    PROMPT: str = "/prompt"
+    LLM: str = "/llm"
     PING: str = "/ping"
     HEALTH: str = "/health"
 

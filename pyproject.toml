@@ -11,21 +11,23 @@ dependencies = [
   # Libraries for data processing
   "pandas",
   "polars",
-  "duckdb",
   # Libraries for Api server
   "fastapi",
   "typer",
   "uvicorn",
   # Project Libraries
   "openai",
-  "requests",
+  "pypdf",
   "scipy",
+  "requests",
   "termcolor",
   "tiktoken",
   "textract",
   "langchain",
   "streamlit",
   "streamlit-chat",
+  # For vector search
+  "qdrant-client",
   # Formatting
   "black",
   # Type checking
@@ -37,7 +39,7 @@ dependencies = [
   # Linting
   "ruff",
   # phidata
-  "phidata==1.7.2",
+  "phidata==1.7.4",
   # Pin for dependency resolution
   "cryptography==39.0.2",
 ]
@@ -51,7 +53,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["api", "app", "notebooks", "tests", "utils", "workspace"]
+packages = ["api", "app", "notebooks", "llm", "tests", "utils", "workspace"]
 
 # Change this value to use a different directory for the phidata workspace.
 # [tool.phidata]

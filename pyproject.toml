@@ -39,7 +39,7 @@ dependencies = [
   # Linting
   "ruff",
   # phidata
-  "phidata==1.7.4",
+  "phidata==1.7.5",
   # Pin for dependency resolution
   "cryptography==39.0.2",
 ]

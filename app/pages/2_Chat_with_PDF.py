@@ -156,12 +156,12 @@ def main() -> None:
             qa = ConversationalRetrievalChain.from_llm(
                 ChatOpenAI(
                     temperature=llm_settings.default_temperature,
-                    model=llm_settings.chat_model,
+                    model=llm_settings.gpt_4,
                 ),
                 retriever=st.session_state["retriever"],
                 condense_question_llm=ChatOpenAI(
                     temperature=llm_settings.default_temperature,
-                    model=llm_settings.condense_model,
+                    model=llm_settings.chat_gpt,
                 ),
             )
             st.session_state["qa"] = qa

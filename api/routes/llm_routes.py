@@ -42,7 +42,7 @@ def llm_prompt_request(prompt_request: PromptRequest):
 
     # -*- Generate completion
     completion_result = openai.ChatCompletion.create(
-        model=llm_settings.condense_model,
+        model=llm_settings.chat_gpt,
         messages=messages,
         max_tokens=prompt_request.max_tokens,
         temperature=prompt_request.temperature,

@@ -54,7 +54,7 @@ def main() -> None:
 
         # -*- Generate completion
         completion_result = openai.ChatCompletion.create(
-            model=llm_settings.chat_model,
+            model=llm_settings.chat_gpt,
             messages=messages,
             max_tokens=llm_settings.default_max_tokens,
             temperature=llm_settings.default_temperature,

@@ -1,8 +1,6 @@
 name: Build ECR Image
 
-on:
-  release:
-    types: [published]
+on: workflow_dispatch
 
 permissions:
   contents: read
@@ -12,9 +10,8 @@ permissions:
 env:
   ECR_REPO: YOUR ECR REPO
   # Create role using https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/
-  AWS_ROLE_FOR_CREDENTIALS: YOUR_ROLE_ARN
-  # Keep this as us-east-1
-  AWS_REGION_FOR_CREDENTIALS: us-east-1
+  AWS_ROLE: YOUR_ROLE_ARN
+  AWS_REGION: us-east-2
 
 jobs:
   build-dev-image:
@@ -31,8 +28,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.AWS_ROLE_FOR_CREDENTIALS }}
-          aws-region: ${{ env.AWS_REGION_FOR_CREDENTIALS }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
       # https://github.com/marketplace/actions/amazon-ecr-login-action-for-github-actions
       - name: ECR Login
         id: login-ecr
@@ -60,8 +57,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.AWS_ROLE_FOR_CREDENTIALS }}
-          aws-region: ${{ env.AWS_REGION_FOR_CREDENTIALS }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
       # https://github.com/marketplace/actions/amazon-ecr-login-action-for-github-actions
       - name: ECR Login
         id: login-ecr
@@ -89,8 +86,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.AWS_ROLE_FOR_CREDENTIALS }}
-          aws-region: ${{ env.AWS_REGION_FOR_CREDENTIALS }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
       # https://github.com/marketplace/actions/amazon-ecr-login-action-for-github-actions
       - name: ECR Login
         id: login-ecr

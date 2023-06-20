@@ -8,10 +8,10 @@ authors = [
 ]
 
 dependencies = [
-  # Libraries for data processing
+  # Data processing Libraries
   "pandas",
   "polars",
-  # Libraries for Api server
+  # Api server Libraries
   "fastapi",
   "typer",
   "uvicorn",
@@ -32,8 +32,6 @@ dependencies = [
   "black",
   # Type checking
   "mypy",
-  # Pre-commit hooks
-  "pre-commit",
   # Testing
   "pytest",
   # Linting

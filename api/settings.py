@@ -32,9 +32,12 @@ class ApiSettings(BaseSettings):
 
     @validator("runtime_env")
     def validate_runtime_env(cls, runtime_env):
+        """Validate runtime_env"""
+
         valid_runtime_envs = ["dev", "stg", "prd"]
         if runtime_env not in valid_runtime_envs:
             raise ValueError(f"Invalid runtime_env: {runtime_env}")
+
         return runtime_env
 
     @validator("cors_origin_list", always=True)

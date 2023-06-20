@@ -15,7 +15,6 @@ Pipfile.lock
 # Machine specific
 .idea
 .vscode
-cloud_sql_proxy
 
 # Ignore .env files
 .env

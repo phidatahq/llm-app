@@ -28,7 +28,7 @@ dev_jupyter = Jupyter(
     image=jupyter_image,
     mount_workspace=True,
     # Get the OpenAI API key from the environment if available
-    env={"OPENAI_API_KEY": getenv("OPENAI_API_KEY", "")},
+    env={"OPENAI_API_KEY": getenv("OPENAI_API_KEY", None)},
     use_cache=ws_settings.use_cache,
     # Read secrets from secrets/dev_jupyter_secrets.yml
     secrets_file=ws_settings.ws_root.joinpath(

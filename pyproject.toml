@@ -8,26 +8,23 @@ authors = [
 ]
 
 dependencies = [
-  # Data processing Libraries
+  # Data processing libraries
   "pandas",
   "polars",
-  # Api server Libraries
+  # Api server libraries
   "fastapi",
   "typer",
   "uvicorn",
-  # Project Libraries
+  # Database libraries
+  "pgvector",
+  "psycopg[binary]",
+  "sqlalchemy",
+  # Project libraries
   "openai",
   "pypdf",
   "scipy",
-  "requests",
-  "termcolor",
   "tiktoken",
-  "textract",
-  "langchain",
   "streamlit",
-  "streamlit-chat",
-  # For vector search
-  "qdrant-client",
   # Formatting
   "black",
   # Type checking
@@ -37,21 +34,18 @@ dependencies = [
   # Linting
   "ruff",
   # phidata
-  "phidata==1.7.8",
-  # Pin for dependency resolution
-  "cryptography==39.0.2",
+  "phidata==2.0.0.dev20",
 ]
-
-[project.scripts]
-api = "api.cli:cli"
-app = "app.cli:cli"
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["api", "app", "notebooks", "llm", "tests", "utils", "workspace"]
+packages = ["api", "app", "llm", "notebooks", "tests", "utils", "workspace"]
+# [tool.setuptools.packages.find]
+# where = "."
+# namespace = "false"
 
 # Change this value to use a different directory for the phidata workspace.
 # [tool.phidata]
@@ -78,11 +72,8 @@ exclude = [
 
 [[tool.mypy.overrides]]
 module = [
-  "pandas.*",
-  "phidata.*",
-  "pyarrow.*",
-  "langchain.*",
+  "phi.*",
+  "pgvector.*",
   "setuptools.*",
-  "streamlit_chat.*",
 ]
 ignore_missing_imports = true

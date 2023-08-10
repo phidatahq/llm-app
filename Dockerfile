@@ -21,8 +21,6 @@ RUN pip install -r requirements.txt
 
 # Copy project files
 COPY . .
-# Install project for the `api` and `app` cli commands
-RUN pip install ${APP_DIR}
 
 COPY scripts /scripts
 ENTRYPOINT ["/scripts/entrypoint.sh"]

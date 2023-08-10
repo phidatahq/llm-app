@@ -1,18 +1,17 @@
 from os import getenv
 
-from phidata.app.fastapi import FastApiServer
-from phidata.app.streamlit import StreamlitApp
-from phidata.aws.config import AwsConfig
-from phidata.aws.resource.group import (
-    AwsResourceGroup,
-    EcsCluster,
-    S3Bucket,
-    SecretsManager,
-    SecurityGroup,
-    InboundRule,
-)
-from phidata.docker.config import DockerConfig, DockerImage
-from phidata.resource.reference import AwsReference
+from phi.aws.app.fastapi import FastApi
+from phi.aws.app.streamlit import Streamlit
+from phi.aws.resource.ec2.security_group import InboundRule, SecurityGroup
+from phi.aws.resource.ecs.cluster import EcsCluster
+from phi.aws.resource.group import AwsResourceGroup
+from phi.aws.resource.rds.db_instance import DbInstance
+from phi.aws.resource.rds.db_subnet_group import DbSubnetGroup
+from phi.aws.resource.reference import AwsReference
+from phi.aws.resource.s3.bucket import S3Bucket
+from phi.aws.resource.secret.manager import SecretsManager
+from phi.docker.resource.group import DockerResourceGroup
+from phi.docker.resource.image import DockerImage
 
 from workspace.settings import ws_settings
 
@@ -26,7 +25,7 @@ save_output: bool = True
 # Create load balancer for the application
 create_load_balancer: bool = True
 
-# -*- Production Image
+# -*- Production application image
 prd_image = DockerImage(
     name=f"{ws_settings.image_repo}/{ws_settings.ws_name}",
     tag=ws_settings.prd_env,
@@ -39,7 +38,7 @@ prd_image = DockerImage(
 )
 
 # -*- S3 bucket for production data
-prd_data_s3_bucket = S3Bucket(
+prd_bucket = S3Bucket(
     name=f"{ws_settings.prd_key}-data",
     enabled=False,
     acl="private",
@@ -48,12 +47,21 @@ prd_data_s3_bucket = S3Bucket(
 )
 
 # -*- Secrets for production application
-prd_app_secret = SecretsManager(
-    name=f"{ws_settings.prd_key}-app-secret",
+prd_secret = SecretsManager(
+    name=f"{ws_settings.prd_key}-secret",
+    group="app",
     # Create secret from workspace/secrets/prd_app_secrets.yml
     secret_files=[
         ws_settings.ws_root.joinpath("workspace/secrets/prd_app_secrets.yml")
     ],
+    skip_delete=skip_delete,
+    save_output=save_output,
+)
+# -*- Secrets for production database
+prd_db_secret = SecretsManager(
+    name=f"{ws_settings.prd_key}-db-secret",
+    group="db",
+    secret_files=[ws_settings.ws_root.joinpath("workspace/secrets/prd_db_secrets.yml")],
     skip_delete=skip_delete,
     save_output=save_output,
 )
@@ -62,6 +70,7 @@ prd_app_secret = SecretsManager(
 prd_lb_sg = SecurityGroup(
     name=f"{ws_settings.prd_key}-lb-security-group",
     enabled=create_load_balancer,
+    group="app",
     description="Security group for the load balancer",
     inbound_rules=[
         InboundRule(
@@ -79,9 +88,10 @@ prd_lb_sg = SecurityGroup(
     save_output=save_output,
 )
 # -*- Security Group for the application
-prd_app_sg = SecurityGroup(
-    name=f"{ws_settings.prd_key}-app-security-group",
+prd_sg = SecurityGroup(
+    name=f"{ws_settings.prd_key}-security-group",
     enabled=ws_settings.prd_api_enabled or ws_settings.prd_app_enabled,
+    group="app",
     description="Security group for the production application",
     inbound_rules=[
         InboundRule(
@@ -99,6 +109,57 @@ prd_app_sg = SecurityGroup(
     skip_delete=skip_delete,
     save_output=save_output,
 )
+# -*- Security Group for the database
+prd_db_port = 5432
+prd_db_sg = SecurityGroup(
+    name=f"{ws_settings.prd_key}-db-security-group",
+    enabled=ws_settings.prd_db_enabled,
+    group="db",
+    description="Security group for the production database",
+    inbound_rules=[
+        InboundRule(
+            description="Allow traffic from apps to the database",
+            port=prd_db_port,
+            source_security_group_id=AwsReference(prd_sg.get_security_group_id),
+        ),
+    ],
+    depends_on=[prd_sg],
+    skip_delete=skip_delete,
+    save_output=save_output,
+)
+
+# -*- RDS Database Subnet Group
+prd_db_subnet_group = DbSubnetGroup(
+    name=f"{ws_settings.prd_key}-db-sg",
+    enabled=ws_settings.prd_db_enabled,
+    group="db",
+    subnet_ids=ws_settings.subnet_ids,
+    skip_delete=skip_delete,
+    save_output=save_output,
+)
+
+# -*- RDS Database Instance
+db_engine = "postgres"
+prd_db = DbInstance(
+    name=f"{ws_settings.prd_key}-db",
+    enabled=ws_settings.prd_db_enabled,
+    group="db",
+    db_name="assemble",
+    engine=db_engine,
+    port=prd_db_port,
+    engine_version="15.3",
+    allocated_storage=128,
+    # NOTE: For production, use a larger instance type.
+    # Last checked price: $0.0320 hourly = ~$25 per month
+    db_instance_class="db.t4g.small",
+    availability_zone=ws_settings.aws_az1,
+    db_subnet_group=prd_db_subnet_group,
+    enable_performance_insights=True,
+    db_security_groups=[prd_db_sg],
+    aws_secret=prd_db_secret,
+    skip_delete=skip_delete,
+    save_output=save_output,
+)
 
 # -*- ECS cluster
 launch_type = "FARGATE"
@@ -110,75 +171,103 @@ prd_ecs_cluster = EcsCluster(
     save_output=save_output,
 )
 
-# -*- StreamlitApp running on ECS
-prd_streamlit = StreamlitApp(
-    name=f"{ws_settings.prd_key}-app",
-    enabled=ws_settings.prd_app_enabled,
-    image=prd_image,
-    command=["app", "start", "Home"],
-    ecs_task_cpu="2048",
-    ecs_task_memory="4096",
-    ecs_cluster=prd_ecs_cluster,
-    ecs_service_count=1,
-    aws_subnets=ws_settings.subnet_ids,
-    aws_secrets=[prd_app_secret],
-    aws_security_groups=[prd_app_sg],
-    load_balancer_security_groups=[prd_lb_sg],
-    create_load_balancer=create_load_balancer,
+# -*- Build container environment
+container_env = {
     # Get the OpenAI API key from the local environment
-    env={"OPENAI_API_KEY": getenv("OPENAI_API_KEY", None)},
-    use_cache=ws_settings.use_cache,
-    skip_delete=skip_delete,
-    save_output=save_output,
-    # Do not wait for the service to stabilize
-    wait_for_creation=False,
-    # Do not wait for the service to be deleted
-    wait_for_deletion=False,
-    # Uncomment to read secrets from secrets/prd_app_secrets.yml
-    # secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/prd_app_secrets.yml"),
-)
+    "OPENAI_API_KEY": getenv("OPENAI_API_KEY", None),
+    "RUNTIME_ENV": "prd",
+}
+if ws_settings.prd_db_enabled:
+    container_env.update(
+        {
+            # Database configuration
+            "DB_HOST": AwsReference(prd_db.get_db_endpoint),
+            "DB_PORT": AwsReference(prd_db.get_db_port),
+            "DB_USER": AwsReference(prd_db.get_master_username),
+            "DB_PASS": AwsReference(prd_db.get_master_user_password),
+            "DB_SCHEMA": AwsReference(prd_db.get_db_name),
+            # Wait for database to be available before starting the server
+            "WAIT_FOR_DB": ws_settings.prd_db_enabled,
+        }
+    )
 
-# -*- FastApiServer running on ECS
-prd_fastapi = FastApiServer(
+# -*- FastApi running on ECS
+prd_api = FastApi(
     name=f"{ws_settings.prd_key}-api",
     enabled=ws_settings.prd_api_enabled,
+    group="app",
     image=prd_image,
-    command=["api", "start"],
+    command="unicorn api:main:app --host 0.0.0.0",
     ecs_task_cpu="2048",
     ecs_task_memory="4096",
-    ecs_cluster=prd_ecs_cluster,
     ecs_service_count=1,
-    aws_subnets=ws_settings.subnet_ids,
-    aws_secrets=[prd_app_secret],
-    aws_security_groups=[prd_app_sg],
+    ecs_cluster=prd_ecs_cluster,
+    aws_secrets=[prd_secret],
+    subnets=ws_settings.subnet_ids,
+    security_groups=[prd_sg],
+    # load_balancer_enable_https=True,
+    # load_balancer_certificate_arn="LOAD_BALANCER_CERTIFICATE_ARN",
     load_balancer_security_groups=[prd_lb_sg],
     create_load_balancer=create_load_balancer,
-    health_check_path="/v1/ping",
-    # Get the OpenAI API key from the local environment
-    env={"OPENAI_API_KEY": getenv("OPENAI_API_KEY", None)},
+    health_check_path="/v1/health",
+    env_vars=container_env,
     use_cache=ws_settings.use_cache,
     skip_delete=skip_delete,
     save_output=save_output,
     # Do not wait for the service to stabilize
-    wait_for_creation=False,
-    # Uncomment to read secrets from secrets/prd_app_secrets.yml
-    # secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/prd_app_secrets.yml"),
+    wait_for_create=False,
+    # Do not wait for the service to be deleted
+    wait_for_delete=False,
+)
+
+# -*- Streamlit running on ECS
+prd_app = Streamlit(
+    name=f"{ws_settings.prd_key}-app",
+    enabled=ws_settings.prd_app_enabled,
+    group="app",
+    image=prd_image,
+    command="streamlit run --server.headless True app/main.py",
+    ecs_task_cpu="2048",
+    ecs_task_memory="4096",
+    ecs_cluster=prd_ecs_cluster,
+    ecs_service_count=1,
+    aws_secrets=[prd_secret],
+    subnets=ws_settings.subnet_ids,
+    security_groups=[prd_sg],
+    # load_balancer_enable_https=True,
+    # load_balancer_certificate_arn="LOAD_BALANCER_CERTIFICATE_ARN",
+    load_balancer_security_groups=[prd_lb_sg],
+    create_load_balancer=create_load_balancer,
+    env_vars=container_env,
+    use_cache=ws_settings.use_cache,
+    skip_delete=skip_delete,
+    save_output=save_output,
+    # Do not wait for the service to stabilize
+    wait_for_create=False,
+    # Do not wait for the service to be deleted
+    wait_for_delete=False,
 )
 
 # -*- DockerConfig defining the prd resources
-prd_docker_config = DockerConfig(
+prd_docker_resources = DockerResourceGroup(
     env=ws_settings.prd_env,
     network=ws_settings.ws_name,
-    images=[prd_image],
+    resources=[prd_image],
 )
 
 # -*- AwsConfig defining the prd resources
-prd_aws_config = AwsConfig(
+prd_aws_config = AwsResourceGroup(
     env=ws_settings.prd_env,
-    apps=[prd_streamlit, prd_fastapi],
-    resources=AwsResourceGroup(
-        secrets=[prd_app_secret],
-        security_groups=[prd_lb_sg, prd_app_sg],
-        s3_buckets=[prd_data_s3_bucket],
-    ),
+    apps=[prd_api, prd_app],
+    resources=[
+        prd_lb_sg,
+        prd_sg,
+        prd_db_sg,
+        prd_secret,
+        prd_db_secret,
+        prd_db_subnet_group,
+        prd_db,
+        prd_ecs_cluster,
+        prd_bucket,
+    ],
 )

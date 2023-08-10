@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from phidata.workspace.settings import WorkspaceSettings
+from phi.workspace.settings import WorkspaceSettings
 
 #
 # -*- Define workspace settings using the WorkspaceSettings class
@@ -15,12 +15,14 @@ ws_settings = WorkspaceSettings(
     # -*- Dev Apps
     dev_app_enabled=True,
     dev_api_enabled=True,
+    dev_db_enabled=True,
     dev_jupyter_enabled=True,
     # -*- Production settings
     prd_env="prd",
     # -*- Production Apps
     prd_app_enabled=True,
     prd_api_enabled=True,
+    prd_db_enabled=True,
     # -*- AWS settings
     # Region for AWS resources
     aws_region="us-east-2",

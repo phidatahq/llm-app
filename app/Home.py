@@ -5,8 +5,10 @@ st.set_page_config(
     page_icon="🚝",
 )
 
+st.title("☃️ LLM Apps")
 st.markdown("### Select a Demo from the sidebar:")
-st.markdown("1. Prompt Demo: Build a prompt product using your own data")
-st.markdown("2. Chat with PDF: Build a chat product using your own data")
+st.markdown("1. Chat with PDF: Chat with a PDF document")
+st.markdown("2. Chat with Wikipedia: Chat with a wikipedia article")
+st.markdown("3. Chat with Website: Chat with a website")
 
 st.sidebar.success("Select a demo from above")

@@ -41,11 +41,9 @@ dependencies = [
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["api", "app", "llm", "notebooks", "tests", "utils", "workspace"]
-# [tool.setuptools.packages.find]
-# where = "."
-# namespace = "false"
+[tool.setuptools.packages.find]
+# [tool.setuptools]
+# packages = ["api", "app", "llm", "notebooks", "tests", "utils", "workspace"]
 
 # Change this value to use a different directory for the phidata workspace.
 # [tool.phidata]

@@ -73,10 +73,14 @@ dev_fastapi = FastApi(
     name=f"{ws_settings.dev_key}-api",
     enabled=ws_settings.dev_api_enabled,
     image=dev_image,
-    command="unicorn api:main:app --host 0.0.0.0 --reload",
+    command="unicorn api:main:app",
     debug_mode=True,
     mount_workspace=True,
-    env_vars=container_env,
+    env_vars={
+        **container_env,
+        "UVICORN_HOST": "0.0.0.0",
+        "UVICORN_RELOAD": True,
+    },
     use_cache=ws_settings.use_cache,
     # Read secrets from secrets/dev_app_secrets.yml
     secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_app_secrets.yml"),
@@ -87,10 +91,13 @@ dev_streamlit = Streamlit(
     name=f"{ws_settings.dev_key}-app",
     enabled=ws_settings.dev_app_enabled,
     image=dev_image,
-    command="streamlit run --server.headless True app/main.py",
+    command="streamlit run app/Home.py",
     debug_mode=True,
     mount_workspace=True,
-    env_vars=container_env,
+    env_vars={
+        **container_env,
+        "STREAMLIT_SERVER_HEADLESS": True,
+    },
     use_cache=ws_settings.use_cache,
     # Read secrets from secrets/dev_app_secrets.yml
     secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_app_secrets.yml"),
@@ -106,7 +113,9 @@ dev_jupyter = Jupyter(
     env_vars=container_env,
     use_cache=ws_settings.use_cache,
     # Read secrets from secrets/dev_jupyter_secrets.yml
-    secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_jupyter_secrets.yml"),
+    secrets_file=ws_settings.ws_root.joinpath(
+        "workspace/secrets/dev_jupyter_secrets.yml"
+    ),
 )
 
 # -*- DockerResourceGroup defining the dev resources

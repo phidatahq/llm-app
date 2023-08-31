@@ -3,7 +3,8 @@ from pathlib import Path
 from phi.workspace.settings import WorkspaceSettings
 
 #
-# -*- Define workspace settings using the WorkspaceSettings class
+# -*- Define workspace settings using a WorkspaceSettings object
+# which can also be set using environment variables.
 #
 ws_settings = WorkspaceSettings(
     # Workspace name: used for naming cloud resources
@@ -16,7 +17,6 @@ ws_settings = WorkspaceSettings(
     dev_app_enabled=True,
     dev_api_enabled=True,
     dev_db_enabled=True,
-    dev_jupyter_enabled=True,
     # -*- Production settings
     prd_env="prd",
     # -*- Production Apps
@@ -32,7 +32,7 @@ ws_settings = WorkspaceSettings(
     # Subnet IDs in the aws_region
     # subnet_ids=["subnet-xyz", "subnet-xyz"],
     # -*- Image Settings
-    # Repository for images
+    # Repository for images (for example to use ECR)
     # image_repo="[ACCOUNT_ID].dkr.ecr.us-east-2.amazonaws.com",
     # Build images locally
     # build_images=True,

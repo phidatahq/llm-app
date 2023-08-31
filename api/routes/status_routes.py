@@ -9,14 +9,14 @@ status_router = APIRouter(tags=["status"])
 
 @status_router.get(endpoints.PING)
 def status_ping():
-    """Ping the API"""
+    """Ping the Api"""
 
     return {"ping": "pong"}
 
 
 @status_router.get(endpoints.HEALTH)
 def status_health():
-    """Check the health of the API"""
+    """Check the health of the Api"""
 
     return {
         "status": "success",

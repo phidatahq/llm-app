@@ -37,7 +37,7 @@ prd_image = DockerImage(
     skip_docker_cache=ws_settings.skip_image_cache,
 )
 
-# -*- S3 bucket for production data
+# -*- S3 bucket for production data (disabled by default)
 prd_bucket = S3Bucket(
     name=f"{ws_settings.prd_key}-data",
     enabled=False,
@@ -61,6 +61,7 @@ prd_secret = SecretsManager(
 prd_db_secret = SecretsManager(
     name=f"{ws_settings.prd_key}-db-secret",
     group="db",
+    # Create secret from workspace/secrets/prd_db_secrets.yml
     secret_files=[ws_settings.ws_root.joinpath("workspace/secrets/prd_db_secrets.yml")],
     skip_delete=skip_delete,
     save_output=save_output,
@@ -96,12 +97,12 @@ prd_sg = SecurityGroup(
     inbound_rules=[
         InboundRule(
             description="Allow traffic from LB to the FastAPI server",
-            port=9090,
+            port=8000,
             source_security_group_id=AwsReference(prd_lb_sg.get_security_group_id),
         ),
         InboundRule(
             description="Allow traffic from LB to the Streamlit app",
-            port=9095,
+            port=8501,
             source_security_group_id=AwsReference(prd_lb_sg.get_security_group_id),
         ),
     ],
@@ -174,30 +175,24 @@ prd_ecs_cluster = EcsCluster(
 # -*- Build container environment
 container_env = {
     # Get the OpenAI API key from the local environment
-    "OPENAI_API_KEY": getenv("OPENAI_API_KEY", None),
-    "RUNTIME_ENV": "prd",
+    "OPENAI_API_KEY": getenv("OPENAI_API_KEY"),
+    # Database configuration
+    "DB_HOST": AwsReference(prd_db.get_db_endpoint),
+    "DB_PORT": AwsReference(prd_db.get_db_port),
+    "DB_USER": AwsReference(prd_db.get_master_username),
+    "DB_PASS": AwsReference(prd_db.get_master_user_password),
+    "DB_SCHEMA": AwsReference(prd_db.get_db_name),
+    # Wait for database to be available before starting the server
+    "WAIT_FOR_DB": ws_settings.prd_db_enabled,
 }
-if ws_settings.prd_db_enabled:
-    container_env.update(
-        {
-            # Database configuration
-            "DB_HOST": AwsReference(prd_db.get_db_endpoint),
-            "DB_PORT": AwsReference(prd_db.get_db_port),
-            "DB_USER": AwsReference(prd_db.get_master_username),
-            "DB_PASS": AwsReference(prd_db.get_master_user_password),
-            "DB_SCHEMA": AwsReference(prd_db.get_db_name),
-            # Wait for database to be available before starting the server
-            "WAIT_FOR_DB": ws_settings.prd_db_enabled,
-        }
-    )
 
 # -*- FastApi running on ECS
-prd_api = FastApi(
+prd_fastapi = FastApi(
     name=f"{ws_settings.prd_key}-api",
     enabled=ws_settings.prd_api_enabled,
     group="app",
     image=prd_image,
-    command="unicorn api:main:app --host 0.0.0.0",
+    command="unicorn api:main:app",
     ecs_task_cpu="2048",
     ecs_task_memory="4096",
     ecs_service_count=1,
@@ -205,6 +200,7 @@ prd_api = FastApi(
     aws_secrets=[prd_secret],
     subnets=ws_settings.subnet_ids,
     security_groups=[prd_sg],
+    # To enable HTTPS, uncomment the following lines:
     # load_balancer_enable_https=True,
     # load_balancer_certificate_arn="LOAD_BALANCER_CERTIFICATE_ARN",
     load_balancer_security_groups=[prd_lb_sg],
@@ -221,12 +217,12 @@ prd_api = FastApi(
 )
 
 # -*- Streamlit running on ECS
-prd_app = Streamlit(
+prd_streamlit = Streamlit(
     name=f"{ws_settings.prd_key}-app",
     enabled=ws_settings.prd_app_enabled,
     group="app",
     image=prd_image,
-    command="streamlit run --server.headless True app/main.py",
+    command="streamlit run app/Home.py",
     ecs_task_cpu="2048",
     ecs_task_memory="4096",
     ecs_cluster=prd_ecs_cluster,
@@ -234,6 +230,7 @@ prd_app = Streamlit(
     aws_secrets=[prd_secret],
     subnets=ws_settings.subnet_ids,
     security_groups=[prd_sg],
+    # To enable HTTPS, uncomment the following lines:
     # load_balancer_enable_https=True,
     # load_balancer_certificate_arn="LOAD_BALANCER_CERTIFICATE_ARN",
     load_balancer_security_groups=[prd_lb_sg],
@@ -248,17 +245,17 @@ prd_app = Streamlit(
     wait_for_delete=False,
 )
 
-# -*- DockerConfig defining the prd resources
+# -*- DockerResourceGroup defining the production docker resources
 prd_docker_resources = DockerResourceGroup(
     env=ws_settings.prd_env,
     network=ws_settings.ws_name,
     resources=[prd_image],
 )
 
-# -*- AwsConfig defining the prd resources
+# -*- AwsResourceGroup defining production aws resources
 prd_aws_config = AwsResourceGroup(
     env=ws_settings.prd_env,
-    apps=[prd_api, prd_app],
+    apps=[prd_fastapi, prd_streamlit],
     resources=[
         prd_lb_sg,
         prd_sg,

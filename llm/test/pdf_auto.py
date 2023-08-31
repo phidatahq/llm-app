@@ -1,4 +1,6 @@
-from llm.conversations.pdf_auto import pdf_auto_conversation
+from llm.conversations.pdf_auto import get_pdf_auto_conversation
+
+pdf_auto_conversation = get_pdf_auto_conversation()
 
 LOAD_KNOWLEDGE_BASE = True
 if LOAD_KNOWLEDGE_BASE:

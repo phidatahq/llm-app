@@ -4,8 +4,6 @@ from pydantic import field_validator, Field
 from pydantic_settings import BaseSettings
 from pydantic_core.core_schema import FieldValidationInfo
 
-from utils.log import logger
-
 
 class ApiSettings(BaseSettings):
     """Api settings that can be derived from environment variables.
@@ -51,7 +49,6 @@ class ApiSettings(BaseSettings):
             valid_cors.extend(["http://localhost:8501", "http://localhost:3000"])
 
         return valid_cors
-
 
 
 # Create ApiSettings object

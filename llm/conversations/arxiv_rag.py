@@ -4,17 +4,17 @@ from phi.conversation import Conversation
 from phi.conversation.storage.postgres import PgConversationStorage
 from phi.llm.openai import OpenAIChat
 
-from llm.knowledge_base import pdf_knowledge_base
+from llm.knowledge_base import arxiv_knowledge_base
 from llm.settings import llm_settings
 from db.session import db_url
 
 
-def get_pdf_auto_conversation(
+def get_arxiv_rag_conversation(
     user_name: Optional[str] = None,
     conversation_id: Optional[int] = None,
     debug_logs: bool = False,
 ) -> Conversation:
-    """Get an autonomous conversation with the PDF knowledge base"""
+    """Get a RAG conversation with the Arxiv knowledge base"""
 
     return Conversation(
         id=conversation_id,
@@ -25,29 +25,37 @@ def get_pdf_auto_conversation(
             temperature=llm_settings.default_temperature,
         ),
         storage=PgConversationStorage(
-            table_name="pdf_auto_conversations",
+            table_name="arxiv_rag_conversations",
             db_url=db_url,
         ),
-        knowledge_base=pdf_knowledge_base,
+        knowledge_base=arxiv_knowledge_base,
         debug_logs=debug_logs,
         monitor=True,
         create_storage=True,
-        function_calls=True,
-        show_function_calls=True,
+        add_history_to_messages=True,
+        add_references_to_prompt=True,
         system_prompt="""\
         You are a chatbot named 'Phi' designed to help users.
-        You have access to a knowledge base that you can search to answer questions.
+        You will be provided with information from a knowledge base that you can use to answer questions.
 
         Remember the following guidelines:
         - If you don't know the answer, say 'I don't know'.
         - Do not use phrases like 'based on the information provided' in your answer.
         - You can ask follow up questions if needed.
         - Use bullet points where possible.
-        - Use markdown to format your answers.
+        - User markdown to format your answers.
         - Keep your answers short and concise, under 5 sentences.
         """,
-        user_prompt_function=lambda message, **kwargs: f"""\
+        user_prompt_function=lambda message, references, **kwargs: f"""\
         Start and end your answers with a polite greeting.
+
+        Use the following information from the knowledge base if it helps.
+        START OF KNOWLEDGE BASE
+        ```
+        {references}
+        ```
+        END OF KNOWLEDGE BASE
+
         Your task is to respond to the following message:
         USER: {message}
         ASSISTANT:

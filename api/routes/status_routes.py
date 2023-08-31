@@ -3,7 +3,10 @@ from fastapi import APIRouter
 from api.routes.endpoints import endpoints
 from utils.dttm import current_utc_str
 
-# -*- Create a FastAPI router for health checks
+######################################################
+## Router for health checks
+######################################################
+
 status_router = APIRouter(tags=["status"])
 
 

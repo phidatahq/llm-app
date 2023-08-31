@@ -5,13 +5,13 @@ from phi.conversation import Conversation
 
 from app.get_openai_key import get_openai_key
 from app.sidebar_reload import show_reload
-from llm.conversations.pdf_rag import get_pdf_rag_conversation
-from llm.conversations.pdf_auto import get_pdf_auto_conversation
+from llm.conversations.arxiv_rag import get_arxiv_rag_conversation
+from llm.conversations.arxiv_auto import get_arxiv_auto_conversation
 
 from utils.log import logger
 
 
-st.title("☃️ Chat with PDF")
+st.title("☃️ Chat with ArXiv")
 
 
 def main() -> None:
@@ -38,7 +38,7 @@ def main() -> None:
 
     # Get conversation type
     conversation_type = st.sidebar.selectbox(
-        "Conversation Type", options=["RAG", "Autonomous"]
+        "Conversation Type", options=["Autonomous", "RAG"]
     )
     # Set conversation_type in session state
     if "conversation_type" not in st.session_state:
@@ -57,13 +57,13 @@ def main() -> None:
     ):
         if st.session_state["conversation_type"] == "Autonomous":
             logger.info("---*--- Creating Autonomous Conversation ---*---")
-            conversation = get_pdf_auto_conversation(
+            conversation = get_arxiv_auto_conversation(
                 user_name=user_name,
                 debug_logs=True,
             )
         else:
             logger.info("---*--- Creating RAG Conversation ---*---")
-            conversation = get_pdf_rag_conversation(
+            conversation = get_arxiv_rag_conversation(
                 user_name=user_name,
                 debug_logs=True,
             )
@@ -149,14 +149,14 @@ def main() -> None:
         logger.debug(f"Loading conversation {new_conversation_id}")
         if st.session_state["conversation_type"] == "Autonomous":
             logger.info("---*--- Loading as Autonomous Conversation ---*---")
-            st.session_state["conversation"] = get_pdf_auto_conversation(
+            st.session_state["conversation"] = get_arxiv_auto_conversation(
                 user_name=user_name,
                 conversation_id=new_conversation_id,
                 debug_logs=True,
             )
         else:
             logger.info("---*--- Loading as RAG Conversation ---*---")
-            st.session_state["conversation"] = get_pdf_rag_conversation(
+            st.session_state["conversation"] = get_arxiv_rag_conversation(
                 user_name=user_name,
                 conversation_id=new_conversation_id,
                 debug_logs=True,

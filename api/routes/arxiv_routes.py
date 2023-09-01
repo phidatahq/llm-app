@@ -16,7 +16,7 @@ from utils.log import logger
 ######################################################
 
 ConversationType = Literal["RAG", "AUTO"]
-arxiv_router = APIRouter(prefix=endpoints.ARXIV, tags=["LLM"])
+arxiv_router = APIRouter(prefix=endpoints.ARXIV, tags=["ARXIV"])
 
 
 def get_conversation(

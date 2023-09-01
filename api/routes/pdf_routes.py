@@ -16,7 +16,7 @@ from utils.log import logger
 ######################################################
 
 ConversationType = Literal["RAG", "AUTO"]
-pdf_router = APIRouter(prefix=endpoints.PDF, tags=["LLM"])
+pdf_router = APIRouter(prefix=endpoints.PDF, tags=["PDF"])
 
 
 def get_conversation(

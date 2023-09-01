@@ -16,7 +16,7 @@ from utils.log import logger
 ######################################################
 
 ConversationType = Literal["RAG", "AUTO"]
-website_router = APIRouter(prefix=endpoints.WEBSITE, tags=["LLM"])
+website_router = APIRouter(prefix=endpoints.WEBSITE, tags=["WEBSITE"])
 
 
 def get_conversation(

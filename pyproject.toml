@@ -36,7 +36,7 @@ dependencies = [
   # Linting
   "ruff",
   # phidata
-  "phidata==2.0.0.dev28",
+  "phidata==2.0.0.dev29",
 ]
 
 [build-system]

@@ -84,6 +84,24 @@ def main() -> None:
             st.session_state["knowledge_base_exists"] = True
             st.sidebar.success("Knowledge Base loaded")
 
+    if st.sidebar.button("New Conversation"):
+        st.session_state["conversation"] = None
+        st.session_state["conversation_id"] = None
+        st.experimental_rerun()
+
+    if st.sidebar.button("Update Knowledge Base"):
+        conversation.knowledge_base.load(recreate=False)
+        st.session_state["knowledge_base_exists"] = True
+        st.sidebar.success("Knowledge Base Updated")
+
+    if st.sidebar.button("Recreate Knowledge Base"):
+        conversation.knowledge_base.load(recreate=True)
+        st.session_state["knowledge_base_exists"] = True
+        st.sidebar.success("Knowledge Base Recreated")
+
+    if st.sidebar.button("Auto Rename"):
+        conversation.auto_rename()
+
     # Load messages if this is not a new conversation
     user_chat_history = conversation.history.get_chat_history()
     if len(user_chat_history) > 0:
@@ -120,24 +138,6 @@ def main() -> None:
             st.session_state["messages"].append(
                 {"role": "assistant", "content": response}
             )
-
-    if st.sidebar.button("New Conversation"):
-        st.session_state["conversation"] = None
-        st.session_state["conversation_id"] = None
-        st.experimental_rerun()
-
-    if st.sidebar.button("Update Knowledge Base"):
-        conversation.knowledge_base.load(recreate=False)
-        st.session_state["knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Updated")
-
-    if st.sidebar.button("Recreate Knowledge Base"):
-        conversation.knowledge_base.load(recreate=True)
-        st.session_state["knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Recreated")
-
-    if st.sidebar.button("Auto Rename"):
-        conversation.auto_rename()
 
     all_conversation_ids: List[int] = conversation.storage.get_all_conversation_ids(
         user_name=user_name

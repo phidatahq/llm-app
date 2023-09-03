@@ -22,12 +22,14 @@
 
 # ignore storage dir
 storage
-.images
+
+# ignore .local dir
+.local
 
 # ignore dist dir
 dist
 
-# ignore virtualenvs
+# ignore common virtualenvs
 .venv
 venv*
 aienv*

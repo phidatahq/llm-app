@@ -1,4 +1,4 @@
-from phi.knowledge.pdf import PDFKnowledgeBase
+from phi.knowledge.pdf import PDFKnowledgeBase, PDFReader
 from phi.knowledge.arxiv import ArxivKnowledgeBase
 from phi.knowledge.website import WebsiteKnowledgeBase
 from phi.vectordb.pgvector import PgVector
@@ -11,6 +11,7 @@ pdf_knowledge_base = PDFKnowledgeBase(
         collection="pdf_documents",
         db_url=db_url,
     ),
+    reader=PDFReader(chunk=False),
 )
 
 arxiv_knowledge_base = ArxivKnowledgeBase(

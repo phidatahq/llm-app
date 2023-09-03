@@ -59,6 +59,7 @@ dev_fastapi = FastApi(
     use_cache=ws_settings.use_cache,
     # Read secrets from secrets/dev_app_secrets.yml
     secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_app_secrets.yml"),
+    depends_on=[dev_db],
 )
 
 # -*- Streamlit running on port 9095
@@ -74,6 +75,7 @@ dev_streamlit = Streamlit(
     use_cache=ws_settings.use_cache,
     # Read secrets from secrets/dev_app_secrets.yml
     secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_app_secrets.yml"),
+    depends_on=[dev_db],
 )
 
 # -*- DockerResourceGroup defining the dev docker resources

@@ -6,15 +6,11 @@ readme = "README.md"
 authors = [{ name = "Team", email = "team@team.com" }]
 
 dependencies = [
-  # Data processing libraries
-  "pandas",
-  "polars",
   # Api server libraries
   "fastapi",
   "typer",
   "uvicorn",
   # Database libraries
-  "alembic",
   "pgvector",
   "psycopg[binary]",
   "sqlalchemy",
@@ -31,8 +27,6 @@ dependencies = [
   "black",
   # Type checking
   "mypy==1.4.1",
-  # Testing
-  "pytest",
   # Linting
   "ruff",
   # phidata

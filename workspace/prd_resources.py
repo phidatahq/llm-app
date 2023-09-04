@@ -10,15 +10,15 @@ from phi.aws.resource.rds.db_subnet_group import DbSubnetGroup
 from phi.aws.resource.reference import AwsReference
 from phi.aws.resource.s3.bucket import S3Bucket
 from phi.aws.resource.secret.manager import SecretsManager
-from phi.docker.resource.group import DockerResourceGroup
 from phi.docker.resource.image import DockerImage
+from phi.docker.resource.group import DockerResourceGroup
 
 from workspace.settings import ws_settings
 
 #
 # -*- Resources for the Production Environment
 #
-# Skip resource deletion when running `phi ws down`
+# Skip resource deletion when running `phi ws down` (set to True after initial deployment)
 skip_delete: bool = False
 # Save resource outputs to workspace/outputs
 save_output: bool = True
@@ -145,11 +145,11 @@ prd_db = DbInstance(
     name=f"{ws_settings.prd_key}-db",
     enabled=ws_settings.prd_db_enabled,
     group="db",
-    db_name="assemble",
+    db_name="llm",
     engine=db_engine,
     port=prd_db_port,
     engine_version="15.3",
-    allocated_storage=128,
+    allocated_storage=64,
     # NOTE: For production, use a larger instance type.
     # Last checked price: $0.0320 hourly = ~$25 per month
     db_instance_class="db.t4g.small",

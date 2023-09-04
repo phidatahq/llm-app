@@ -4,7 +4,7 @@ from phi.workspace.settings import WorkspaceSettings
 
 #
 # -*- Define workspace settings using a WorkspaceSettings object
-# which can also be set using environment variables.
+# these values can also be set using environment variables.
 #
 ws_settings = WorkspaceSettings(
     # Workspace name: used for naming cloud resources
@@ -32,7 +32,7 @@ ws_settings = WorkspaceSettings(
     # Subnet IDs in the aws_region
     # subnet_ids=["subnet-xyz", "subnet-xyz"],
     # -*- Image Settings
-    # Repository for images (for example to use ECR)
+    # Repository for images (for example, to use ECR use the following format)
     # image_repo="[ACCOUNT_ID].dkr.ecr.us-east-2.amazonaws.com",
     # Build images locally
     # build_images=True,

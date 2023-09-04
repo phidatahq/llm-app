@@ -20,7 +20,7 @@ class DbSettings(BaseSettings):
     db_schema: Optional[str] = None
     db_driver: str = "postgresql+psycopg"
     # Create/Upgrade database on startup using alembic
-    upgrade_db: bool = False
+    migrate_db: bool = False
 
     def get_db_url(self) -> str:
         url = "{}://{}{}@{}:{}/{}".format(

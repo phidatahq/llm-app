@@ -160,8 +160,6 @@ prd_db = DbInstance(
     aws_secret=prd_db_secret,
     skip_delete=skip_delete,
     save_output=save_output,
-    # Do not wait for the db to be deleted
-    wait_for_delete=False,
 )
 
 # -*- ECS cluster

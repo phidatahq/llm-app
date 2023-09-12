@@ -11,7 +11,7 @@ from workspace.settings import ws_settings
 
 # -*- Jupyter image
 jupyter_image = DockerImage(
-    name=f"{ws_settings.image_repo}/{ws_settings.ws_name}-jupyter",
+    name=f"{ws_settings.image_repo}/jupyter-{ws_settings.ws_name}",
     tag=ws_settings.dev_env,
     enabled=(ws_settings.build_images and ws_settings.dev_jupyter_enabled),
     path=str(ws_settings.ws_root),

@@ -6,6 +6,7 @@ from phi.docker.app.streamlit import Streamlit
 from phi.docker.resources import DockerResources
 from phi.docker.resource.image import DockerImage
 
+from workspace.jupyter.lab import dev_jupyter_app
 from workspace.settings import ws_settings
 
 #
@@ -84,5 +85,5 @@ dev_streamlit = Streamlit(
 dev_docker_resources = DockerResources(
     env=ws_settings.dev_env,
     network=ws_settings.ws_name,
-    apps=[dev_db, dev_fastapi, dev_streamlit],
+    apps=[dev_db, dev_fastapi, dev_streamlit, dev_jupyter_app],
 )

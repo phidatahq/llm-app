@@ -2,8 +2,8 @@
 
 This repo contains the code for running a LLM App in 2 environments:
 
-1. development: runs locally using docker
-2. production: runs on AWS ECS
+1. `dev`: A development environment running locally on docker
+2. `prd`: A production environment running on AWS ECS
 
 ## Setup Workspace (for new users)
 
@@ -42,7 +42,7 @@ cp -r workspace/example_secrets workspace/secrets
 cp example.env .env
 ```
 
-## Run LLM App locally using docker
+## Run LLM App locally on docker
 
 The `workspace/dev_resources.py` file contains the code for the development resources.
 
@@ -64,13 +64,24 @@ export OPENAI_API_KEY=sk-***
 phi ws up --env dev --infra docker
 ```
 
-- Open [localhost:9095](http://localhost:9095) to view the Streamlit App.
-- Open [localhost:9090/docs](http://localhost:9090/docs) to view the FastApi docs.
-- Open [localhost:8888](http://localhost:8888) to view JupyterLab UI.
+- Open [localhost:8501](http://localhost:8501) to view the Streamlit App.
+- Open [localhost:8000/docs](http://localhost:8000/docs) to view the FastApi docs.
+- If Jupyter is enabled, open [localhost:8888](http://localhost:8888) to view JupyterLab UI.
 
-## Update python libraries
+## Update development environment
 
-The `pyproject.toml` file is the [standard](https://peps.python.org/pep-0621/) for configuring python projects. This project is already configured to manage libraries using `pyproject.toml`, which is used to automatically generate the `requirements.txt` file using [pip-tools](https://pip-tools.readthedocs.io/en/latest/).
+To update your dev environment:
+
+1. Build a new dev image
+2. Update docker resources
+
+## Example: update python libraries
+
+The most common update to the application is adding new python libraries.
+
+The `pyproject.toml` file is the [standard](https://peps.python.org/pep-0621/) for managing python projects and this app comes with a pre-configured `pyproject.toml`.
+
+The dependencies in the `pyproject.toml` file are used to automatically generate the `requirements.txt` file using [pip-tools](https://pip-tools.readthedocs.io/en/latest/).
 
 ### To add new python libraries
 
@@ -86,7 +97,7 @@ Open the `pyproject.toml` file and add new libraries to the dependencies section
 ./scripts/upgrade.sh
 ```
 
-**Option 2:** **OR** Generate the `requirements.txt` file using `pip-compile`:
+**Option 2:** **OR** Generate the `requirements.txt` file by running `pip-compile` directly:
 
 ```sh
 pip-compile --no-annotate --pip-args "--no-cache-dir" \
@@ -108,7 +119,7 @@ Set `build_images=True` in the `workspace/settings.py` file:
     build_images=True,
 ```
 
-Then force create all dev:docker resources using the `-f` flag:
+Then force create `dev:docker` resources using the `-f` flag:
 
 ```sh
 phi ws up --env dev --infra docker -f
@@ -122,7 +133,7 @@ phi ws up --env dev --infra docker -f
 ./scripts/build_dev_image.sh
 ```
 
-Then restart all dev:docker resources using:
+Then restart `dev:docker` resources using:
 
 ```sh
 phi ws restart --env dev --infra docker
@@ -165,7 +176,7 @@ Update the `image_repo`, `build_images`, `push_images` variables in the `workspa
 aws ecr get-login-password --region [region] | docker login --username AWS --password-stdin [account].dkr.ecr.[region].amazonaws.com
 ```
 
-Create prd:docker resources using:
+Create `prd:docker` resources using:
 
 ```sh
 phi ws up --env prd --infra docker
@@ -204,7 +215,7 @@ To update your production environment:
 aws ecr get-login-password --region [region] | docker login --username AWS --password-stdin [account].dkr.ecr.[region].amazonaws.com
 ```
 
-Recreate prd:docker resources using:
+Recreate `prd:docker` resources using:
 
 ```sh
 phi ws up --env prd --infra docker -f

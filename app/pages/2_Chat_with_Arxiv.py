@@ -74,7 +74,7 @@ def main() -> None:
     st.session_state["arxiv_conversation_id"] = arxiv_conversation.start()
 
     # Check if knowlege base exists
-    if (
+    if arxiv_conversation.knowledge_base and (
         "arxiv_knowledge_base_exists" not in st.session_state
         or not st.session_state["arxiv_knowledge_base_exists"]
     ):
@@ -126,42 +126,44 @@ def main() -> None:
         st.session_state["arxiv_conversation_id"] = None
         st.experimental_rerun()
 
-    if st.sidebar.button("Update Knowledge Base"):
-        arxiv_conversation.knowledge_base.load(recreate=False)
-        st.session_state["arxiv_knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Updated")
+    if arxiv_conversation.knowledge_base:
+        if st.sidebar.button("Update Knowledge Base"):
+            arxiv_conversation.knowledge_base.load(recreate=False)
+            st.session_state["arxiv_knowledge_base_exists"] = True
+            st.sidebar.success("Knowledge Base Updated")
 
-    if st.sidebar.button("Recreate Knowledge Base"):
-        arxiv_conversation.knowledge_base.load(recreate=True)
-        st.session_state["arxiv_knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Recreated")
+        if st.sidebar.button("Recreate Knowledge Base"):
+            arxiv_conversation.knowledge_base.load(recreate=True)
+            st.session_state["arxiv_knowledge_base_exists"] = True
+            st.sidebar.success("Knowledge Base Recreated")
 
     if st.sidebar.button("Auto Rename"):
         arxiv_conversation.auto_rename()
 
-    all_arxiv_conversation_ids: List[
-        int
-    ] = arxiv_conversation.storage.get_all_conversation_ids(user_name=user_name)
-    new_arxiv_conversation_id = st.sidebar.selectbox(
-        "Conversation ID", options=all_arxiv_conversation_ids
-    )
-    if st.session_state["arxiv_conversation_id"] != new_arxiv_conversation_id:
-        logger.debug(f"Loading conversation {new_arxiv_conversation_id}")
-        if st.session_state["arxiv_conversation_type"] == "Autonomous":
-            logger.info("---*--- Loading as Autonomous Conversation ---*---")
-            st.session_state["arxiv_conversation"] = get_arxiv_auto_conversation(
-                user_name=user_name,
-                conversation_id=new_arxiv_conversation_id,
-                debug_logs=True,
-            )
-        else:
-            logger.info("---*--- Loading as RAG Conversation ---*---")
-            st.session_state["arxiv_conversation"] = get_arxiv_rag_conversation(
-                user_name=user_name,
-                conversation_id=new_arxiv_conversation_id,
-                debug_logs=True,
-            )
-        st.experimental_rerun()
+    if arxiv_conversation.storage:
+        all_arxiv_conversation_ids: List[
+            int
+        ] = arxiv_conversation.storage.get_all_conversation_ids(user_name=user_name)
+        new_arxiv_conversation_id = st.sidebar.selectbox(
+            "Conversation ID", options=all_arxiv_conversation_ids
+        )
+        if st.session_state["arxiv_conversation_id"] != new_arxiv_conversation_id:
+            logger.debug(f"Loading conversation {new_arxiv_conversation_id}")
+            if st.session_state["arxiv_conversation_type"] == "Autonomous":
+                logger.info("---*--- Loading as Autonomous Conversation ---*---")
+                st.session_state["arxiv_conversation"] = get_arxiv_auto_conversation(
+                    user_name=user_name,
+                    conversation_id=new_arxiv_conversation_id,
+                    debug_logs=True,
+                )
+            else:
+                logger.info("---*--- Loading as RAG Conversation ---*---")
+                st.session_state["arxiv_conversation"] = get_arxiv_rag_conversation(
+                    user_name=user_name,
+                    conversation_id=new_arxiv_conversation_id,
+                    debug_logs=True,
+                )
+            st.experimental_rerun()
 
     arxiv_conversation_name = arxiv_conversation.name
     if arxiv_conversation_name:

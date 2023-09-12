@@ -1,9 +1,9 @@
 ## LLM App
 
-This repo contains the code for running an LLM App in 2 environments:
+This repo contains the code for running a LLM App in 2 environments:
 
-1. dev: A development env running locally using docker
-2. prd: A production env running on AWS ECS
+1. development: runs locally using docker
+2. production: runs on AWS ECS
 
 ## Setup Workspace (for new users)
 
@@ -48,9 +48,9 @@ The `workspace/dev_resources.py` file contains the code for the development reso
 
 1. Install [docker desktop](https://www.docker.com/products/docker-desktop)
 
-2. Optional: Set OpenAI Key
+2. Set OpenAI Key
 
-If you have an `OPENAI_API_KEY`, set the environment variable using
+Set the `OPENAI_API_KEY` environment variable using
 
 ```sh
 export OPENAI_API_KEY=sk-***
@@ -61,7 +61,7 @@ export OPENAI_API_KEY=sk-***
 3. Start the workspace using:
 
 ```sh
-phi ws up dev:docker
+phi ws up --env dev --infra docker
 ```
 
 - Open [localhost:9095](http://localhost:9095) to view the Streamlit App.
@@ -70,7 +70,7 @@ phi ws up dev:docker
 
 ## Update python libraries
 
-The `pyproject.toml` file is the [standard](https://peps.python.org/pep-0621/) for configuring python projects. This project is already configured to manage libraries using `pyproject.toml`, which is then used to generate the `requirements.txt` file.
+The `pyproject.toml` file is the [standard](https://peps.python.org/pep-0621/) for configuring python projects. This project is already configured to manage libraries using `pyproject.toml`, which is used to automatically generate the `requirements.txt` file using [pip-tools](https://pip-tools.readthedocs.io/en/latest/).
 
 ### To add new python libraries
 
@@ -86,7 +86,7 @@ Open the `pyproject.toml` file and add new libraries to the dependencies section
 ./scripts/upgrade.sh
 ```
 
-**Option 2:** Generate the `requirements.txt` file using `pip-compile`:
+**Option 2:** **OR** Generate the `requirements.txt` file using `pip-compile`:
 
 ```sh
 pip-compile --no-annotate --pip-args "--no-cache-dir" \
@@ -94,11 +94,11 @@ pip-compile --no-annotate --pip-args "--no-cache-dir" \
 pyproject.toml
 ```
 
-### Step 3: Rebuild image and re-run containers
+### Step 3: Rebuild image and recreate containers
 
-**Option 1:** Rebuild dev images and re-run containers using the `phi` cli
+**Option 1:** Rebuild dev images and recreate containers using the `phi` cli
 
-Set the following values in the `workspace/settings.py` file:
+Set `build_images=True` in the `workspace/settings.py` file:
 
 ```python
     # -*- Image Settings
@@ -108,15 +108,15 @@ Set the following values in the `workspace/settings.py` file:
     build_images=True,
 ```
 
-Then force recreate all dev:docker resources using:
+Then force create all dev:docker resources using the `-f` flag:
 
 ```sh
-phi ws up dev:docker -f
+phi ws up --env dev --infra docker -f
 ```
 
-**Option 2:** Use a helper script to build images
+**Option 2:** **OR** Use a helper script to build images
 
-> Update the image repo in the script
+> Update the image repo before running the script
 
 ```sh
 ./scripts/build_dev_image.sh
@@ -125,7 +125,7 @@ phi ws up dev:docker -f
 Then restart all dev:docker resources using:
 
 ```sh
-phi ws restart dev:docker
+phi ws restart --env dev --infra docker
 ```
 
 ## Shut down dev environment
@@ -133,7 +133,7 @@ phi ws restart dev:docker
 Delete dev resources using:
 
 ```sh
-phi ws down dev:docker
+phi ws down --env dev --infra docker
 ```
 
 ## Run LLM App in production on AWS
@@ -147,7 +147,7 @@ The `workspace/prd_resources.py` file contains the code for the production resou
 
 **Option 1:** Build and push production image using the `phi` cli
 
-Set the following values in the `workspace/settings.py` file:
+Update the `image_repo`, `build_images`, `push_images` variables in the `workspace/settings.py` file:
 
 ```python
     # -*- Image Settings
@@ -168,12 +168,12 @@ aws ecr get-login-password --region [region] | docker login --username AWS --pas
 Create prd:docker resources using:
 
 ```sh
-phi ws up prd:docker
+phi ws up --env prd --infra docker
 ```
 
-**Option 2:** Use a helper script to build images
+**Option 2:** **OR** Use a helper script to build images
 
-> Update the image repo in the script
+> Update the image repo before running the script
 
 ```sh
 ./scripts/build_prd_image.sh
@@ -184,7 +184,7 @@ phi ws up prd:docker
 Create production AWS resources using:
 
 ```sh
-phi ws up prd:aws
+phi ws up --env prd --infra aws
 ```
 
 ## Update production environment
@@ -207,10 +207,10 @@ aws ecr get-login-password --region [region] | docker login --username AWS --pas
 Recreate prd:docker resources using:
 
 ```sh
-phi ws up prd:docker -f
+phi ws up --env prd --infra docker -f
 ```
 
-**Option 2:** Use a helper script to build images
+**Option 2:** **OR** Use a helper script to build images
 
 ```sh
 ./scripts/build_prd_image.sh
@@ -218,22 +218,22 @@ phi ws up prd:docker -f
 
 ### Step 2: Update AWS resources
 
-1. If you updated the CPU, Memory or Environment, then update the production task definition
+1. If you updated the CPU, Memory or Environment, first update the production task definition
 
 ```sh
-phi ws patch prd:aws:td
+phi ws patch --env prd --infra aws --name td
 ```
 
 2. Update production ECS Service
 
 ```sh
-phi ws patch prd:aws:service
+phi ws patch --env prd --infra aws --name service
 ```
 
 **Note:** If you **ONLY** want to pick up the new image, you do not need to update the task definition and can only update the service using
 
 ```sh
-phi ws patch prd:aws:service
+phi ws patch --env prd --infra aws --name service
 ```
 
 ### Shut down production environment
@@ -241,5 +241,5 @@ phi ws patch prd:aws:service
 Delete production resources using:
 
 ```sh
-phi ws down prd:aws
+phi ws down --env prd --infra aws
 ```

@@ -27,6 +27,7 @@ def get_website_rag_conversation(
         storage=PgConversationStorage(
             table_name="website_rag_conversations",
             db_url=db_url,
+            schema="llm",
         ),
         knowledge_base=website_knowledge_base,
         debug_logs=debug_logs,

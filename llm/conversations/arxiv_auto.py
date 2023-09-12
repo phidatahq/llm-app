@@ -28,6 +28,7 @@ def get_arxiv_auto_conversation(
         storage=PgConversationStorage(
             table_name="arxiv_auto_conversations",
             db_url=db_url,
+            schema="llm",
         ),
         knowledge_base=arxiv_knowledge_base,
         debug_logs=debug_logs,

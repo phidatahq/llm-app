@@ -27,6 +27,7 @@ def get_arxiv_rag_conversation(
         storage=PgConversationStorage(
             table_name="arxiv_rag_conversations",
             db_url=db_url,
+            schema="llm",
         ),
         knowledge_base=arxiv_knowledge_base,
         debug_logs=debug_logs,

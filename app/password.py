@@ -17,24 +17,26 @@ def check_password() -> bool:
     def check_first_run_password():
         """Checks whether a password entered on the first run is correct."""
 
-        password_to_check = st.session_state["first_run_password"]
-        if password_to_check == app_password:
-            st.session_state["password_correct"] = True
-            # don't store password
-            del st.session_state["first_run_password"]
-        else:
-            st.session_state["password_correct"] = False
+        if "first_run_password" in st.session_state:
+            password_to_check = st.session_state["first_run_password"]
+            if password_to_check == app_password:
+                st.session_state["password_correct"] = True
+                # don't store password
+                del st.session_state["first_run_password"]
+            else:
+                st.session_state["password_correct"] = False
 
     def check_updated_password():
         """Checks whether an updated password is correct."""
 
-        password_to_check = st.session_state["updated_password"]
-        if password_to_check == app_password:
-            st.session_state["password_correct"] = True
-            # don't store password
-            del st.session_state["updated_password"]
-        else:
-            st.session_state["password_correct"] = False
+        if "updated_password" in st.session_state:
+            password_to_check = st.session_state["updated_password"]
+            if password_to_check == app_password:
+                st.session_state["password_correct"] = True
+                # don't store password
+                del st.session_state["updated_password"]
+            else:
+                st.session_state["password_correct"] = False
 
     # First run, show input for password.
     if "password_correct" not in st.session_state:

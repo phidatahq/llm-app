@@ -74,7 +74,7 @@ def main() -> None:
     st.session_state["website_conversation_id"] = website_conversation.start()
 
     # Check if knowlege base exists
-    if (
+    if website_conversation.knowledge_base and (
         "website_knowledge_base_exists" not in st.session_state
         or not st.session_state["website_knowledge_base_exists"]
     ):
@@ -126,42 +126,46 @@ def main() -> None:
         st.session_state["website_conversation_id"] = None
         st.experimental_rerun()
 
-    if st.sidebar.button("Update Knowledge Base"):
-        website_conversation.knowledge_base.load(recreate=False)
-        st.session_state["knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Updated")
+    if website_conversation.knowledge_base:
+        if st.sidebar.button("Update Knowledge Base"):
+            website_conversation.knowledge_base.load(recreate=False)
+            st.session_state["knowledge_base_exists"] = True
+            st.sidebar.success("Knowledge Base Updated")
 
-    if st.sidebar.button("Recreate Knowledge Base"):
-        website_conversation.knowledge_base.load(recreate=True)
-        st.session_state["knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Recreated")
+        if st.sidebar.button("Recreate Knowledge Base"):
+            website_conversation.knowledge_base.load(recreate=True)
+            st.session_state["knowledge_base_exists"] = True
+            st.sidebar.success("Knowledge Base Recreated")
 
     if st.sidebar.button("Auto Rename"):
         website_conversation.auto_rename()
 
-    all_website_conversation_ids: List[
-        int
-    ] = website_conversation.storage.get_all_conversation_ids(user_name=user_name)
-    new_website_conversation_id = st.sidebar.selectbox(
-        "Conversation ID", options=all_website_conversation_ids
-    )
-    if st.session_state["website_conversation_id"] != new_website_conversation_id:
-        logger.debug(f"Loading conversation {new_website_conversation_id}")
-        if st.session_state["website_conversation_type"] == "Autonomous":
-            logger.info("---*--- Loading as Autonomous Conversation ---*---")
-            st.session_state["website_conversation"] = get_website_auto_conversation(
-                user_name=user_name,
-                conversation_id=new_website_conversation_id,
-                debug_logs=True,
-            )
-        else:
-            logger.info("---*--- Loading as RAG Conversation ---*---")
-            st.session_state["website_conversation"] = get_website_rag_conversation(
-                user_name=user_name,
-                conversation_id=new_website_conversation_id,
-                debug_logs=True,
-            )
-        st.experimental_rerun()
+    if website_conversation.storage:
+        all_website_conversation_ids: List[
+            int
+        ] = website_conversation.storage.get_all_conversation_ids(user_name=user_name)
+        new_website_conversation_id = st.sidebar.selectbox(
+            "Conversation ID", options=all_website_conversation_ids
+        )
+        if st.session_state["website_conversation_id"] != new_website_conversation_id:
+            logger.debug(f"Loading conversation {new_website_conversation_id}")
+            if st.session_state["website_conversation_type"] == "Autonomous":
+                logger.info("---*--- Loading as Autonomous Conversation ---*---")
+                st.session_state[
+                    "website_conversation"
+                ] = get_website_auto_conversation(
+                    user_name=user_name,
+                    conversation_id=new_website_conversation_id,
+                    debug_logs=True,
+                )
+            else:
+                logger.info("---*--- Loading as RAG Conversation ---*---")
+                st.session_state["website_conversation"] = get_website_rag_conversation(
+                    user_name=user_name,
+                    conversation_id=new_website_conversation_id,
+                    debug_logs=True,
+                )
+            st.experimental_rerun()
 
     website_conversation_name = website_conversation.name
     if website_conversation_name:

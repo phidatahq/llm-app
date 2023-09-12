@@ -145,7 +145,11 @@ def get_conversations(body: GetAllConversationsRequest):
     conversation: Conversation = get_conversation(
         conversation_type=body.conversation_type, user_name=body.user_name
     )
-    return conversation.storage.get_all_conversations(user_name=body.user_name)
+    return (
+        conversation.storage.get_all_conversations(user_name=body.user_name)
+        if conversation.storage
+        else []
+    )
 
 
 class GetAllConversationIdsRequest(BaseModel):
@@ -161,7 +165,11 @@ def get_conversation_ids(body: GetAllConversationIdsRequest):
     conversation: Conversation = get_conversation(
         conversation_type=body.conversation_type, user_name=body.user_name
     )
-    return conversation.storage.get_all_conversation_ids(user_name=body.user_name)
+    return (
+        conversation.storage.get_all_conversation_ids(user_name=body.user_name)
+        if conversation.storage
+        else []
+    )
 
 
 class RenameConversationRequest(BaseModel):

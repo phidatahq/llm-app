@@ -3,8 +3,8 @@ from os import getenv
 from phi.docker.app.fastapi import FastApi
 from phi.docker.app.postgres import PgVectorDb
 from phi.docker.app.streamlit import Streamlit
+from phi.docker.resources import DockerResources
 from phi.docker.resource.image import DockerImage
-from phi.docker.resource.group import DockerResourceGroup
 
 from workspace.settings import ws_settings
 
@@ -28,9 +28,9 @@ dev_image = DockerImage(
 dev_db = PgVectorDb(
     name=f"{ws_settings.dev_key}-db",
     enabled=ws_settings.dev_db_enabled,
-    db_user="llm",
-    db_password="llm",
-    db_schema="llm",
+    pg_user="llm",
+    pg_password="llm",
+    pg_database="llm",
 )
 
 # -*- Build container environment
@@ -42,12 +42,14 @@ container_env = {
     "DB_PORT": dev_db.get_db_port(),
     "DB_USER": dev_db.get_db_user(),
     "DB_PASS": dev_db.get_db_password(),
-    "DB_SCHEMA": dev_db.get_db_schema(),
+    "DB_DATABASE": dev_db.get_db_database(),
     # Wait for database to be available before starting the application
     "WAIT_FOR_DB": ws_settings.dev_db_enabled,
+    # Migrate database on startup using alembic
+    # "MIGRATE_DB": ws_settings.prd_db_enabled,
 }
 
-# -*- FastApi running on port 9090
+# -*- FastApi running on port 8000
 dev_fastapi = FastApi(
     name=f"{ws_settings.dev_key}-api",
     enabled=ws_settings.dev_api_enabled,
@@ -62,7 +64,7 @@ dev_fastapi = FastApi(
     depends_on=[dev_db],
 )
 
-# -*- Streamlit running on port 9095
+# -*- Streamlit running on port 8501
 dev_streamlit = Streamlit(
     name=f"{ws_settings.dev_key}-app",
     enabled=ws_settings.dev_app_enabled,
@@ -78,8 +80,8 @@ dev_streamlit = Streamlit(
     depends_on=[dev_db],
 )
 
-# -*- DockerResourceGroup defining the dev docker resources
-dev_docker_resources = DockerResourceGroup(
+# -*- Dev DockerResources
+dev_docker_resources = DockerResources(
     env=ws_settings.dev_env,
     network=ws_settings.ws_name,
     apps=[dev_db, dev_fastapi, dev_streamlit],

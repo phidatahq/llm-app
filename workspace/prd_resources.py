@@ -3,15 +3,15 @@ from os import getenv
 from phi.aws.app.fastapi import FastApi
 from phi.aws.app.streamlit import Streamlit
 from phi.aws.resource.ec2.security_group import InboundRule, SecurityGroup
+from phi.aws.resources import AwsResources
 from phi.aws.resource.ecs.cluster import EcsCluster
-from phi.aws.resource.group import AwsResourceGroup
 from phi.aws.resource.rds.db_instance import DbInstance
 from phi.aws.resource.rds.db_subnet_group import DbSubnetGroup
 from phi.aws.resource.reference import AwsReference
 from phi.aws.resource.s3.bucket import S3Bucket
 from phi.aws.resource.secret.manager import SecretsManager
+from phi.docker.resources import DockerResources
 from phi.docker.resource.image import DockerImage
-from phi.docker.resource.group import DockerResourceGroup
 
 from workspace.settings import ws_settings
 
@@ -37,7 +37,8 @@ prd_image = DockerImage(
     skip_docker_cache=ws_settings.skip_image_cache,
 )
 
-# -*- S3 bucket for production data (disabled by default)
+# -*- S3 bucket for production data
+# > set enabled=True when needed
 prd_bucket = S3Bucket(
     name=f"{ws_settings.prd_key}-data",
     enabled=False,
@@ -151,8 +152,8 @@ prd_db = DbInstance(
     engine_version="15.3",
     allocated_storage=64,
     # NOTE: For production, use a larger instance type.
-    # Last checked price: $0.0320 hourly = ~$25 per month
-    db_instance_class="db.t4g.small",
+    # Last checked price: $0.0650 hourly = ~$50 per month
+    db_instance_class="db.t4g.medium",
     availability_zone=ws_settings.aws_az1,
     db_subnet_group=prd_db_subnet_group,
     enable_performance_insights=True,
@@ -178,12 +179,13 @@ prd_ecs_cluster = EcsCluster(
 container_env = {
     # Get the OpenAI API key from the local environment
     "OPENAI_API_KEY": getenv("OPENAI_API_KEY"),
+    "RUNTIME_ENV": "prd",
     # Database configuration
     "DB_HOST": AwsReference(prd_db.get_db_endpoint),
     "DB_PORT": AwsReference(prd_db.get_db_port),
     "DB_USER": AwsReference(prd_db.get_master_username),
     "DB_PASS": AwsReference(prd_db.get_master_user_password),
-    "DB_SCHEMA": AwsReference(prd_db.get_db_name),
+    "DB_DATABASE": AwsReference(prd_db.get_db_name),
     # Wait for database to be available before starting the server
     "WAIT_FOR_DB": ws_settings.prd_db_enabled,
 }
@@ -194,7 +196,7 @@ prd_fastapi = FastApi(
     enabled=ws_settings.prd_api_enabled,
     group="app",
     image=prd_image,
-    command="unicorn api:main:app",
+    command="uvicorn api.main:app",
     ecs_task_cpu="2048",
     ecs_task_memory="4096",
     ecs_service_count=1,
@@ -202,7 +204,7 @@ prd_fastapi = FastApi(
     aws_secrets=[prd_secret],
     subnets=ws_settings.subnet_ids,
     security_groups=[prd_sg],
-    # To enable HTTPS, uncomment the following lines:
+    # To enable HTTPS, create an ACM certificate and add the ARN below:
     # load_balancer_enable_https=True,
     # load_balancer_certificate_arn="LOAD_BALANCER_CERTIFICATE_ARN",
     load_balancer_security_groups=[prd_lb_sg],
@@ -232,7 +234,7 @@ prd_streamlit = Streamlit(
     aws_secrets=[prd_secret],
     subnets=ws_settings.subnet_ids,
     security_groups=[prd_sg],
-    # To enable HTTPS, uncomment the following lines:
+    # To enable HTTPS, create an ACM certificate and add the ARN below:
     # load_balancer_enable_https=True,
     # load_balancer_certificate_arn="LOAD_BALANCER_CERTIFICATE_ARN",
     load_balancer_security_groups=[prd_lb_sg],
@@ -247,15 +249,15 @@ prd_streamlit = Streamlit(
     wait_for_delete=False,
 )
 
-# -*- DockerResourceGroup defining the production docker resources
-prd_docker_resources = DockerResourceGroup(
+# -*- Production DockerResources
+prd_docker_resources = DockerResources(
     env=ws_settings.prd_env,
     network=ws_settings.ws_name,
     resources=[prd_image],
 )
 
-# -*- AwsResourceGroup defining production aws resources
-prd_aws_config = AwsResourceGroup(
+# -*- Production AwsResources
+prd_aws_resources = AwsResources(
     env=ws_settings.prd_env,
     apps=[prd_fastapi, prd_streamlit],
     resources=[

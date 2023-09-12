@@ -74,7 +74,7 @@ def main() -> None:
     st.session_state["pdf_conversation_id"] = pdf_conversation.start()
 
     # Check if knowlege base exists
-    if (
+    if pdf_conversation.knowledge_base and (
         "pdf_knowledge_base_exists" not in st.session_state
         or not st.session_state["pdf_knowledge_base_exists"]
     ):
@@ -126,42 +126,44 @@ def main() -> None:
         st.session_state["pdf_conversation_id"] = None
         st.experimental_rerun()
 
-    if st.sidebar.button("Update Knowledge Base"):
-        pdf_conversation.knowledge_base.load(recreate=False)
-        st.session_state["pdf_knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Updated")
+    if pdf_conversation.knowledge_base:
+        if st.sidebar.button("Update Knowledge Base"):
+            pdf_conversation.knowledge_base.load(recreate=False)
+            st.session_state["pdf_knowledge_base_exists"] = True
+            st.sidebar.success("Knowledge Base Updated")
 
-    if st.sidebar.button("Recreate Knowledge Base"):
-        pdf_conversation.knowledge_base.load(recreate=True)
-        st.session_state["pdf_knowledge_base_exists"] = True
-        st.sidebar.success("Knowledge Base Recreated")
+        if st.sidebar.button("Recreate Knowledge Base"):
+            pdf_conversation.knowledge_base.load(recreate=True)
+            st.session_state["pdf_knowledge_base_exists"] = True
+            st.sidebar.success("Knowledge Base Recreated")
 
     if st.sidebar.button("Auto Rename"):
         pdf_conversation.auto_rename()
 
-    all_pdf_conversation_ids: List[
-        int
-    ] = pdf_conversation.storage.get_all_conversation_ids(user_name=user_name)
-    new_pdf_conversation_id = st.sidebar.selectbox(
-        "Conversation ID", options=all_pdf_conversation_ids
-    )
-    if st.session_state["pdf_conversation_id"] != new_pdf_conversation_id:
-        logger.debug(f"Loading conversation {new_pdf_conversation_id}")
-        if st.session_state["pdf_conversation_type"] == "Autonomous":
-            logger.info("---*--- Loading as Autonomous Conversation ---*---")
-            st.session_state["pdf_conversation"] = get_pdf_auto_conversation(
-                user_name=user_name,
-                conversation_id=new_pdf_conversation_id,
-                debug_logs=True,
-            )
-        else:
-            logger.info("---*--- Loading as RAG Conversation ---*---")
-            st.session_state["pdf_conversation"] = get_pdf_rag_conversation(
-                user_name=user_name,
-                conversation_id=new_pdf_conversation_id,
-                debug_logs=True,
-            )
-        st.experimental_rerun()
+    if pdf_conversation.storage:
+        all_pdf_conversation_ids: List[
+            int
+        ] = pdf_conversation.storage.get_all_conversation_ids(user_name=user_name)
+        new_pdf_conversation_id = st.sidebar.selectbox(
+            "Conversation ID", options=all_pdf_conversation_ids
+        )
+        if st.session_state["pdf_conversation_id"] != new_pdf_conversation_id:
+            logger.debug(f"Loading conversation {new_pdf_conversation_id}")
+            if st.session_state["pdf_conversation_type"] == "Autonomous":
+                logger.info("---*--- Loading as Autonomous Conversation ---*---")
+                st.session_state["pdf_conversation"] = get_pdf_auto_conversation(
+                    user_name=user_name,
+                    conversation_id=new_pdf_conversation_id,
+                    debug_logs=True,
+                )
+            else:
+                logger.info("---*--- Loading as RAG Conversation ---*---")
+                st.session_state["pdf_conversation"] = get_pdf_rag_conversation(
+                    user_name=user_name,
+                    conversation_id=new_pdf_conversation_id,
+                    debug_logs=True,
+                )
+            st.experimental_rerun()
 
     pdf_conversation_name = pdf_conversation.name
     if pdf_conversation_name:

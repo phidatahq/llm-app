@@ -37,8 +37,7 @@ prd_image = DockerImage(
     skip_docker_cache=ws_settings.skip_image_cache,
 )
 
-# -*- S3 bucket for production data
-# > set enabled=True when needed
+# -*- S3 bucket for production data (set enabled=True when needed)
 prd_bucket = S3Bucket(
     name=f"{ws_settings.prd_key}-data",
     enabled=False,
@@ -188,6 +187,8 @@ container_env = {
     "DB_DATABASE": AwsReference(prd_db.get_db_name),
     # Wait for database to be available before starting the server
     "WAIT_FOR_DB": ws_settings.prd_db_enabled,
+    # Migrate database on startup using alembic
+    # "MIGRATE_DB": ws_settings.prd_db_enabled,
 }
 
 # -*- FastApi running on ECS

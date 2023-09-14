@@ -3,6 +3,7 @@ from typing import List
 import streamlit as st
 from phi.conversation import Conversation
 
+from app.password import check_password
 from app.get_openai_key import get_openai_key
 from app.sidebar_reload import show_reload
 from llm.conversations.website_rag import get_website_rag_conversation
@@ -175,4 +176,5 @@ def main() -> None:
     show_reload()
 
 
-main()
+if check_password():
+    main()

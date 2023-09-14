@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class LLMSettings(BaseSettings):
-    """LLM settings that can also be derived from environment variables.
+    """LLM settings that can be set using environment variables.
 
     Reference: https://pydantic-docs.helpmanual.io/usage/settings/
     """

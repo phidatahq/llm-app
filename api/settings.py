@@ -6,7 +6,7 @@ from pydantic_core.core_schema import FieldValidationInfo
 
 
 class ApiSettings(BaseSettings):
-    """Api settings that can be derived from environment variables.
+    """Api settings that can be set using environment variables.
 
     Reference: https://pydantic-docs.helpmanual.io/usage/settings/
     """

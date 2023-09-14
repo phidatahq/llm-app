@@ -176,9 +176,9 @@ prd_ecs_cluster = EcsCluster(
 
 # -*- Build container environment
 container_env = {
+    "RUNTIME_ENV": "prd",
     # Get the OpenAI API key from the local environment
     "OPENAI_API_KEY": getenv("OPENAI_API_KEY"),
-    "RUNTIME_ENV": "prd",
     # Database configuration
     "DB_HOST": AwsReference(prd_db.get_db_endpoint),
     "DB_PORT": AwsReference(prd_db.get_db_port),
@@ -198,6 +198,7 @@ prd_fastapi = FastApi(
     group="app",
     image=prd_image,
     command="uvicorn api.main:app",
+    port_number=8000,
     ecs_task_cpu="2048",
     ecs_task_memory="4096",
     ecs_service_count=1,
@@ -228,6 +229,7 @@ prd_streamlit = Streamlit(
     group="app",
     image=prd_image,
     command="streamlit run app/Home.py",
+    port_number=8501,
     ecs_task_cpu="2048",
     ecs_task_memory="4096",
     ecs_cluster=prd_ecs_cluster,

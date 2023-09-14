@@ -36,6 +36,7 @@ dev_db = PgVectorDb(
 
 # -*- Build container environment
 container_env = {
+    "RUNTIME_ENV": "dev",
     # Get the OpenAI API key from the local environment
     "OPENAI_API_KEY": getenv("OPENAI_API_KEY"),
     # Database configuration
@@ -56,6 +57,7 @@ dev_fastapi = FastApi(
     enabled=ws_settings.dev_api_enabled,
     image=dev_image,
     command="uvicorn api.main:app --reload",
+    port_number=8000,
     debug_mode=True,
     mount_workspace=True,
     env_vars=container_env,
@@ -71,6 +73,7 @@ dev_streamlit = Streamlit(
     enabled=ws_settings.dev_app_enabled,
     image=dev_image,
     command="streamlit run app/Home.py",
+    port_number=8501,
     debug_mode=True,
     mount_workspace=True,
     streamlit_server_headless=True,

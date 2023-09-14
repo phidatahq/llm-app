@@ -32,6 +32,9 @@ dev_db = PgVectorDb(
     pg_user="llm",
     pg_password="llm",
     pg_database="llm",
+    # Connect to this db on port 5432
+    host_port=5432,
+    debug_mode=True,
 )
 
 # -*- Build container environment

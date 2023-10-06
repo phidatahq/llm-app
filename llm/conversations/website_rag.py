@@ -1,18 +1,17 @@
 from typing import Optional
 
 from phi.conversation import Conversation
-from phi.conversation.storage.postgres import PgConversationStorage
 from phi.llm.openai import OpenAIChat
 
-from llm.knowledge_base import website_knowledge_base
 from llm.settings import llm_settings
-from db.session import db_url
+from llm.storage import website_conversation_storage
+from llm.knowledge_base import website_knowledge_base
 
 
 def get_website_rag_conversation(
     user_name: Optional[str] = None,
-    conversation_id: Optional[int] = None,
-    debug_logs: bool = False,
+    conversation_id: Optional[str] = None,
+    debug_mode: bool = False,
 ) -> Conversation:
     """Get an RAG conversation with the Website knowledge base"""
 
@@ -24,16 +23,11 @@ def get_website_rag_conversation(
             max_tokens=llm_settings.default_max_tokens,
             temperature=llm_settings.default_temperature,
         ),
-        storage=PgConversationStorage(
-            table_name="website_rag_conversations",
-            db_url=db_url,
-            schema="llm",
-        ),
+        storage=website_conversation_storage,
         knowledge_base=website_knowledge_base,
-        debug_logs=debug_logs,
+        debug_mode=debug_mode,
         monitor=True,
-        create_storage=True,
-        add_history_to_messages=True,
+        add_chat_history_to_messages=True,
         add_references_to_prompt=True,
         system_prompt="""\
         You are a chatbot named 'Phi' designed to help users.
@@ -61,4 +55,5 @@ def get_website_rag_conversation(
         USER: {message}
         ASSISTANT:
         """,
+        meta_data={"conversation_type": "RAG"},
     )

@@ -1,3 +1,4 @@
+from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -9,4 +10,4 @@ class Base(DeclarativeBase):
     https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBase
     """
 
-    pass
+    metadata = MetaData(schema="public")

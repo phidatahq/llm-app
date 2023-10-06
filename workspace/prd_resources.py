@@ -185,7 +185,7 @@ container_env = {
     "DB_USER": AwsReference(prd_db.get_master_username),
     "DB_PASS": AwsReference(prd_db.get_master_user_password),
     "DB_DATABASE": AwsReference(prd_db.get_db_name),
-    # Wait for database to be available before starting the server
+    # Wait for database to be available before starting the application
     "WAIT_FOR_DB": ws_settings.prd_db_enabled,
     # Migrate database on startup using alembic
     # "MIGRATE_DB": ws_settings.prd_db_enabled,

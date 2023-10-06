@@ -16,14 +16,12 @@ dependencies = [
   "psycopg[binary]",
   "sqlalchemy",
   # Project libraries
-  "arxiv",
-  "beautifulsoup4",
   "openai",
   "pypdf",
-  "scipy",
   "streamlit",
   "tiktoken",
-  "wikipedia",
+  "beautifulsoup4",
+  "types-beautifulsoup4",
   # Formatting
   "black",
   # Type checking
@@ -31,7 +29,7 @@ dependencies = [
   # Linting
   "ruff",
   # phidata
-  "phidata==2.0.4",
+  "phidata==2.0.14",
 ]
 
 [build-system]

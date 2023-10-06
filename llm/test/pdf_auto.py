@@ -9,5 +9,4 @@ if LOAD_KNOWLEDGE_BASE and pdf_auto_conversation.knowledge_base:
 pdf_auto_conversation.print_response("Tell me about food safety?")
 pdf_auto_conversation.print_response("Share a good evening recipe?")
 pdf_auto_conversation.print_response("How do I make chicken casserole?")
-pdf_auto_conversation.print_response("How do I make Spaghetti Bolognaise?")
 pdf_auto_conversation.print_response("Summarize our conversation")

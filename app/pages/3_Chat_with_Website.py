@@ -2,17 +2,24 @@ from typing import List
 
 import streamlit as st
 from phi.conversation import Conversation
+from phi.knowledge.website import WebsiteKnowledgeBase
 
+from app.openai_key import get_openai_key
 from app.password import check_password
-from app.get_openai_key import get_openai_key
-from app.sidebar_reload import show_reload
-from llm.conversations.website_rag import get_website_rag_conversation
+from app.reload import reload_button
+from app.user_name import get_user_name
 from llm.conversations.website_auto import get_website_auto_conversation
-
+from llm.conversations.website_rag import get_website_rag_conversation
 from utils.log import logger
 
 
 st.title("☃️ Chat with Website")
+
+
+def restart_conversation():
+    st.session_state["website_conversation"] = None
+    st.session_state["website_conversation_id"] = None
+    st.rerun()
 
 
 def main() -> None:
@@ -22,33 +29,25 @@ def main() -> None:
         st.write("🔑  OpenAI API key not set")
         return
 
-    # Get username
-    if "user_name" not in st.session_state:
-        username_input_container = st.sidebar.empty()
-        username = username_input_container.text_input(":astronaut: Enter username")
-        if username != "":
-            st.session_state["user_name"] = username
-            username_input_container.empty()
-
-    user_name = st.session_state.get("user_name", None)
+    # Get user name
+    user_name = get_user_name()
     if user_name:
-        st.sidebar.info(f":astronaut: User: {user_name}")
+        st.sidebar.info(f":technologist: User: {user_name}")
     else:
-        st.write(":astronaut: Please enter a username")
+        st.write(":technologist: Please enter a username")
         return
 
     # Get conversation type
     website_conversation_type = st.sidebar.selectbox(
-        "Conversation Type", options=["Autonomous", "RAG"]
+        "Conversation Type", options=["RAG", "Autonomous"]
     )
     # Set conversation_type in session state
     if "website_conversation_type" not in st.session_state:
         st.session_state["website_conversation_type"] = website_conversation_type
     # Restart the conversation if conversation_type has changed
     elif st.session_state["website_conversation_type"] != website_conversation_type:
-        st.session_state["website_conversation"] = None
         st.session_state["website_conversation_type"] = website_conversation_type
-        st.experimental_rerun()
+        restart_conversation()
 
     # Get the conversation
     website_conversation: Conversation
@@ -60,33 +59,48 @@ def main() -> None:
             logger.info("---*--- Creating Autonomous Conversation ---*---")
             website_conversation = get_website_auto_conversation(
                 user_name=user_name,
-                debug_logs=True,
+                debug_mode=True,
             )
         else:
             logger.info("---*--- Creating RAG Conversation ---*---")
             website_conversation = get_website_rag_conversation(
                 user_name=user_name,
-                debug_logs=True,
+                debug_mode=True,
             )
         st.session_state["website_conversation"] = website_conversation
     else:
         website_conversation = st.session_state["website_conversation"]
+
     # Start conversation and save conversation id in session state
     st.session_state["website_conversation_id"] = website_conversation.start()
 
     # Check if knowlege base exists
     if website_conversation.knowledge_base and (
-        "website_knowledge_base_exists" not in st.session_state
-        or not st.session_state["website_knowledge_base_exists"]
+        "website_knowledge_base_loaded" not in st.session_state
+        or not st.session_state["website_knowledge_base_loaded"]
     ):
         if not website_conversation.knowledge_base.exists():
-            st.sidebar.write("🧠 Loading knowledge base")
+            loading_container = st.sidebar.info("🧠 Loading knowledge base")
             website_conversation.knowledge_base.load()
-            st.session_state["website_knowledge_base_exists"] = True
+            st.session_state["website_knowledge_base_loaded"] = True
             st.sidebar.success("Knowledge Base loaded")
+            loading_container.empty()
+
+    # Add websites to knowledge base
+    website_knowledge_base: WebsiteKnowledgeBase = website_conversation.knowledge_base  # type: ignore
+    if website_knowledge_base:
+        website_url = st.sidebar.text_input("Add Website to Knowledge Base")
+        if website_url != "":
+            if website_url not in website_knowledge_base.urls:
+                website_knowledge_base.urls.append(website_url)
+                loading_container = st.sidebar.info(f"🧠 Loading {website_url}")
+                website_knowledge_base.load()
+                st.session_state["website_knowledge_base_loaded"] = True
+                st.sidebar.success("Knowledge Base loaded")
+                loading_container.empty()
 
     # Load messages if this is not a new conversation
-    user_chat_history = website_conversation.history.get_chat_history()
+    user_chat_history = website_conversation.memory.get_chat_history()
     if len(user_chat_history) > 0:
         logger.debug("Loading chat history")
         st.session_state["messages"] = user_chat_history
@@ -96,7 +110,7 @@ def main() -> None:
             {"role": "assistant", "content": "Ask me anything..."}
         ]
 
-    # Prompt for user input and save
+    # Prompt for user input
     if prompt := st.chat_input():
         st.session_state["messages"].append({"role": "user", "content": prompt})
 
@@ -123,9 +137,7 @@ def main() -> None:
             )
 
     if st.sidebar.button("New Conversation"):
-        st.session_state["website_conversation"] = None
-        st.session_state["website_conversation_id"] = None
-        st.experimental_rerun()
+        restart_conversation()
 
     if website_conversation.knowledge_base:
         if st.sidebar.button("Update Knowledge Base"):
@@ -143,7 +155,7 @@ def main() -> None:
 
     if website_conversation.storage:
         all_website_conversation_ids: List[
-            int
+            str
         ] = website_conversation.storage.get_all_conversation_ids(user_name=user_name)
         new_website_conversation_id = st.sidebar.selectbox(
             "Conversation ID", options=all_website_conversation_ids
@@ -157,23 +169,23 @@ def main() -> None:
                 ] = get_website_auto_conversation(
                     user_name=user_name,
                     conversation_id=new_website_conversation_id,
-                    debug_logs=True,
+                    debug_mode=True,
                 )
             else:
                 logger.info("---*--- Loading as RAG Conversation ---*---")
                 st.session_state["website_conversation"] = get_website_rag_conversation(
                     user_name=user_name,
                     conversation_id=new_website_conversation_id,
-                    debug_logs=True,
+                    debug_mode=True,
                 )
-            st.experimental_rerun()
+            st.rerun()
 
     website_conversation_name = website_conversation.name
     if website_conversation_name:
         st.sidebar.write(f":thread: {website_conversation_name}")
 
     # Show reload button
-    show_reload()
+    reload_button()
 
 
 if check_password():

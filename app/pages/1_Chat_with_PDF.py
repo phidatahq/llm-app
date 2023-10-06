@@ -3,16 +3,22 @@ from typing import List
 import streamlit as st
 from phi.conversation import Conversation
 
+from app.openai_key import get_openai_key
 from app.password import check_password
-from app.get_openai_key import get_openai_key
-from app.sidebar_reload import show_reload
-from llm.conversations.pdf_rag import get_pdf_rag_conversation
+from app.reload import reload_button
+from app.user_name import get_user_name
 from llm.conversations.pdf_auto import get_pdf_auto_conversation
-
+from llm.conversations.pdf_rag import get_pdf_rag_conversation
 from utils.log import logger
 
 
-st.title("☃️ Chat with PDF")
+st.title(":snowman: Chat with PDF")
+
+
+def restart_conversation():
+    st.session_state["pdf_conversation"] = None
+    st.session_state["pdf_conversation_id"] = None
+    st.rerun()
 
 
 def main() -> None:
@@ -22,19 +28,12 @@ def main() -> None:
         st.write("🔑  OpenAI API key not set")
         return
 
-    # Get username
-    if "user_name" not in st.session_state:
-        username_input_container = st.sidebar.empty()
-        username = username_input_container.text_input(":astronaut: Enter username")
-        if username != "":
-            st.session_state["user_name"] = username
-            username_input_container.empty()
-
-    user_name = st.session_state.get("user_name", None)
+    # Get user name
+    user_name = get_user_name()
     if user_name:
-        st.sidebar.info(f":astronaut: User: {user_name}")
+        st.sidebar.info(f":technologist: User: {user_name}")
     else:
-        st.write(":astronaut: Please enter a username")
+        st.write(":technologist: Please enter a username")
         return
 
     # Get conversation type
@@ -46,9 +45,8 @@ def main() -> None:
         st.session_state["pdf_conversation_type"] = pdf_conversation_type
     # Restart the conversation if conversation_type has changed
     elif st.session_state["pdf_conversation_type"] != pdf_conversation_type:
-        st.session_state["pdf_conversation"] = None
         st.session_state["pdf_conversation_type"] = pdf_conversation_type
-        st.experimental_rerun()
+        restart_conversation()
 
     # Get the conversation
     pdf_conversation: Conversation
@@ -60,33 +58,35 @@ def main() -> None:
             logger.info("---*--- Creating Autonomous Conversation ---*---")
             pdf_conversation = get_pdf_auto_conversation(
                 user_name=user_name,
-                debug_logs=True,
+                debug_mode=True,
             )
         else:
             logger.info("---*--- Creating RAG Conversation ---*---")
             pdf_conversation = get_pdf_rag_conversation(
                 user_name=user_name,
-                debug_logs=True,
+                debug_mode=True,
             )
         st.session_state["pdf_conversation"] = pdf_conversation
     else:
         pdf_conversation = st.session_state["pdf_conversation"]
+
     # Start conversation and save conversation id in session state
     st.session_state["pdf_conversation_id"] = pdf_conversation.start()
 
     # Check if knowlege base exists
     if pdf_conversation.knowledge_base and (
-        "pdf_knowledge_base_exists" not in st.session_state
-        or not st.session_state["pdf_knowledge_base_exists"]
+        "pdf_knowledge_base_loaded" not in st.session_state
+        or not st.session_state["pdf_knowledge_base_loaded"]
     ):
         if not pdf_conversation.knowledge_base.exists():
-            st.sidebar.write("🧠 Loading knowledge base")
+            loading_container = st.sidebar.info("🧠 Loading knowledge base")
             pdf_conversation.knowledge_base.load()
-            st.session_state["pdf_knowledge_base_exists"] = True
+            st.session_state["pdf_knowledge_base_loaded"] = True
             st.sidebar.success("Knowledge Base loaded")
+            loading_container.empty()
 
-    # Load messages if this is not a new conversation
-    user_chat_history = pdf_conversation.history.get_chat_history()
+    # Load messages for existing conversation
+    user_chat_history = pdf_conversation.memory.get_chat_history()
     if len(user_chat_history) > 0:
         logger.debug("Loading chat history")
         st.session_state["messages"] = user_chat_history
@@ -96,7 +96,7 @@ def main() -> None:
             {"role": "assistant", "content": "Ask me anything..."}
         ]
 
-    # Prompt for user input and save
+    # Prompt for user input
     if prompt := st.chat_input():
         st.session_state["messages"].append({"role": "user", "content": prompt})
 
@@ -109,7 +109,7 @@ def main() -> None:
 
     # If last message is from a user, generate a new response
     last_message = st.session_state["messages"][-1]
-    if last_message.get("role", "") == "user":
+    if last_message.get("role") == "user":
         question = last_message["content"]
         with st.chat_message("assistant"):
             response = ""
@@ -123,19 +123,17 @@ def main() -> None:
             )
 
     if st.sidebar.button("New Conversation"):
-        st.session_state["pdf_conversation"] = None
-        st.session_state["pdf_conversation_id"] = None
-        st.experimental_rerun()
+        restart_conversation()
 
     if pdf_conversation.knowledge_base:
         if st.sidebar.button("Update Knowledge Base"):
             pdf_conversation.knowledge_base.load(recreate=False)
-            st.session_state["pdf_knowledge_base_exists"] = True
+            st.session_state["pdf_knowledge_base_loaded"] = True
             st.sidebar.success("Knowledge Base Updated")
 
         if st.sidebar.button("Recreate Knowledge Base"):
             pdf_conversation.knowledge_base.load(recreate=True)
-            st.session_state["pdf_knowledge_base_exists"] = True
+            st.session_state["pdf_knowledge_base_loaded"] = True
             st.sidebar.success("Knowledge Base Recreated")
 
     if st.sidebar.button("Auto Rename"):
@@ -143,7 +141,7 @@ def main() -> None:
 
     if pdf_conversation.storage:
         all_pdf_conversation_ids: List[
-            int
+            str
         ] = pdf_conversation.storage.get_all_conversation_ids(user_name=user_name)
         new_pdf_conversation_id = st.sidebar.selectbox(
             "Conversation ID", options=all_pdf_conversation_ids
@@ -155,23 +153,23 @@ def main() -> None:
                 st.session_state["pdf_conversation"] = get_pdf_auto_conversation(
                     user_name=user_name,
                     conversation_id=new_pdf_conversation_id,
-                    debug_logs=True,
+                    debug_mode=True,
                 )
             else:
                 logger.info("---*--- Loading as RAG Conversation ---*---")
                 st.session_state["pdf_conversation"] = get_pdf_rag_conversation(
                     user_name=user_name,
                     conversation_id=new_pdf_conversation_id,
-                    debug_logs=True,
+                    debug_mode=True,
                 )
-            st.experimental_rerun()
+            st.rerun()
 
     pdf_conversation_name = pdf_conversation.name
     if pdf_conversation_name:
         st.sidebar.write(f":thread: {pdf_conversation_name}")
 
     # Show reload button
-    show_reload()
+    reload_button()
 
 
 if check_password():

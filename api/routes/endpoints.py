@@ -5,9 +5,8 @@ from dataclasses import dataclass
 class ApiEndpoints:
     PING: str = "/ping"
     HEALTH: str = "/health"
-    PDF: str = "/pdf"
-    ARXIV: str = "/arxiv"
-    WEBSITE: str = "/website"
+    PDF_CONVERSATION: str = "/pdf/conversation"
+    WEBSITE_CONVERSATION: str = "/website/conversation"
 
 
 endpoints = ApiEndpoints()

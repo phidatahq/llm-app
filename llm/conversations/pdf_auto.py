@@ -1,18 +1,17 @@
 from typing import Optional
 
 from phi.conversation import Conversation
-from phi.conversation.storage.postgres import PgConversationStorage
 from phi.llm.openai import OpenAIChat
 
-from llm.knowledge_base import pdf_knowledge_base
 from llm.settings import llm_settings
-from db.session import db_url
+from llm.storage import pdf_conversation_storage
+from llm.knowledge_base import pdf_knowledge_base
 
 
 def get_pdf_auto_conversation(
     user_name: Optional[str] = None,
-    conversation_id: Optional[int] = None,
-    debug_logs: bool = False,
+    conversation_id: Optional[str] = None,
+    debug_mode: bool = False,
 ) -> Conversation:
     """Get an autonomous conversation with the PDF knowledge base"""
 
@@ -24,20 +23,15 @@ def get_pdf_auto_conversation(
             max_tokens=llm_settings.default_max_tokens,
             temperature=llm_settings.default_temperature,
         ),
-        storage=PgConversationStorage(
-            table_name="pdf_auto_conversations",
-            db_url=db_url,
-            schema="llm",
-        ),
+        storage=pdf_conversation_storage,
         knowledge_base=pdf_knowledge_base,
-        debug_logs=debug_logs,
+        debug_mode=debug_mode,
         monitor=True,
-        create_storage=True,
         function_calls=True,
         show_function_calls=True,
         system_prompt="""\
         You are a chatbot named 'Phi' designed to help users.
-        You have access to a knowledge base that you can search to answer questions.
+        You have access to a knowledge base of PDF files that you can search to answer questions.
 
         Remember the following guidelines:
         - If you don't know the answer, say 'I don't know'.
@@ -53,4 +47,5 @@ def get_pdf_auto_conversation(
         USER: {message}
         ASSISTANT:
         """,
+        meta_data={"conversation_type": "AUTO"},
     )

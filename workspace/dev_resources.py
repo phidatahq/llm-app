@@ -54,7 +54,7 @@ container_env = {
     # "MIGRATE_DB": ws_settings.prd_db_enabled,
 }
 
-# -*- FastApi running on port 8000
+# -*- FastApi running on port 8000:8000
 dev_fastapi = FastApi(
     name=f"{ws_settings.dev_key}-api",
     enabled=ws_settings.dev_api_enabled,
@@ -70,7 +70,7 @@ dev_fastapi = FastApi(
     depends_on=[dev_db],
 )
 
-# -*- Streamlit running on port 8501
+# -*- Streamlit running on port 8501:8501
 dev_streamlit = Streamlit(
     name=f"{ws_settings.dev_key}-app",
     enabled=ws_settings.dev_app_enabled,

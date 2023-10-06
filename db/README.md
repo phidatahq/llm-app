@@ -9,38 +9,9 @@ Steps to create/update the database using alembic:
 
 > Note: Set Env Var `MIGRATE_DB = True` to run the database migration in the entrypoint script at container startup.
 
-## Example: Creating your first table
+## Creat a database revision using alembic
 
-### Step 1: Create table definition
-
-Create a file `db/tables/users.py` with the following content:
-
-```python
-from datetime import datetime
-from typing import Optional
-
-from sqlalchemy.sql.expression import text
-from sqlalchemy.types import DateTime
-from sqlalchemy.orm import Mapped, mapped_column
-
-from db.tables.base import Base
-
-
-class UsersTable(Base):
-    id: Mapped[int] = mapped_column(primary_key=True,     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
-    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), onupdate=text("now()"))
-```
-
-### Step 2: Import the table
-
-Import the table in the `db/tables/__init__.py` file:
-
-```python
-from db.tables.base import Base
-from db.tables.users import UsersTable
-```
-
-### Step 3: Creat a database revision using alembic
+SSH into the dev container to run the alembic command to create a database migration.
 
 ```bash
 docker exec -it llm-dev-api zsh
@@ -48,7 +19,9 @@ docker exec -it llm-dev-api zsh
 alembic -c db/alembic.ini revision --autogenerate -m "Initialize DB"
 ```
 
-## Step 4: Upgrade local database
+## Upgrade development database
+
+SSH into the dev container to run the alembic command to upgrade the database.
 
 ```bash
 docker exec -it llm-dev-api zsh
@@ -56,10 +29,26 @@ docker exec -it llm-dev-api zsh
 alembic -c db/alembic.ini upgrade head
 ```
 
-## Upgrading the production database
+## Upgrade production database
 
 1. Recommended: Set Env Var `MIGRATE_DB = True` which runs `alembic -c db/alembic.ini upgrade head` from the entrypoint script at container startup.
-2. **OR** you can ssh into the production container to run the migration manually
+2. **OR** you can SSH into the production container to run the migration manually
+
+```bash
+ECS_CLUSTER=llm-prd-cluster
+TASK_ARN=$(aws ecs list-tasks --cluster phi-api-prd --query "taskArns[0]" --output text)
+CONTAINER_NAME=llm-prd
+
+aws ecs execute-command --cluster $ECS_CLUSTER \
+    --task $TASK_ARN \
+    --container $CONTAINER_NAME \
+    --interactive \
+    --command "zsh"
+```
+
+```bash
+alembic -c db/alembic.ini upgrade head
+```
 
 ---
 

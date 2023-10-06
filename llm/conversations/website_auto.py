@@ -1,19 +1,18 @@
 from typing import Optional
 
 from phi.conversation import Conversation
-from phi.conversation.storage.postgres import PgConversationStorage
 from phi.llm.openai import OpenAIChat
 from phi.llm.function.website import WebsiteRegistry
 
-from llm.knowledge_base import website_knowledge_base
 from llm.settings import llm_settings
-from db.session import db_url
+from llm.storage import website_conversation_storage
+from llm.knowledge_base import website_knowledge_base
 
 
 def get_website_auto_conversation(
     user_name: Optional[str] = None,
-    conversation_id: Optional[int] = None,
-    debug_logs: bool = False,
+    conversation_id: Optional[str] = None,
+    debug_mode: bool = False,
 ) -> Conversation:
     """Get an autonomous conversation with the Website knowledge base"""
 
@@ -25,15 +24,10 @@ def get_website_auto_conversation(
             max_tokens=llm_settings.default_max_tokens,
             temperature=llm_settings.default_temperature,
         ),
-        storage=PgConversationStorage(
-            table_name="website_auto_conversations",
-            db_url=db_url,
-            schema="llm",
-        ),
+        storage=website_conversation_storage,
         knowledge_base=website_knowledge_base,
-        debug_logs=debug_logs,
+        debug_mode=debug_mode,
         monitor=True,
-        create_storage=True,
         function_calls=True,
         show_function_calls=True,
         function_registries=[
@@ -41,7 +35,8 @@ def get_website_auto_conversation(
         ],
         system_prompt="""\
         You are a chatbot named 'Phi' designed to help users.
-        You have access to website contents that you can search to answer questions.
+        You have access to a knowledge base of website contents that you can search to answer questions.
+        You also have access to functions to add new websites to the knowledge base.
 
         Remember the following guidelines:
         - If you don't know the answer, say 'I don't know'.
@@ -57,4 +52,5 @@ def get_website_auto_conversation(
         USER: {message}
         ASSISTANT:
         """,
+        meta_data={"conversation_type": "AUTO"},
     )

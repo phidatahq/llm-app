@@ -13,7 +13,7 @@ from llm.conversations.website_rag import get_website_rag_conversation
 from utils.log import logger
 
 
-st.title("☃️ Chat with Website")
+st.title(":snowman: Chat with Websites")
 
 
 def restart_conversation():

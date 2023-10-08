@@ -12,7 +12,7 @@ from llm.conversations.pdf_rag import get_pdf_rag_conversation
 from utils.log import logger
 
 
-st.title(":snowman: Chat with PDF")
+st.title(":snowman: Chat with PDFs")
 
 
 def restart_conversation():

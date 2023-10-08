@@ -54,22 +54,6 @@ container_env = {
     # "MIGRATE_DB": ws_settings.prd_db_enabled,
 }
 
-# -*- FastApi running on port 8000:8000
-dev_fastapi = FastApi(
-    name=f"{ws_settings.dev_key}-api",
-    enabled=ws_settings.dev_api_enabled,
-    image=dev_image,
-    command="uvicorn api.main:app --reload",
-    port_number=8000,
-    debug_mode=True,
-    mount_workspace=True,
-    env_vars=container_env,
-    use_cache=ws_settings.use_cache,
-    # Read secrets from secrets/dev_app_secrets.yml
-    secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_app_secrets.yml"),
-    depends_on=[dev_db],
-)
-
 # -*- Streamlit running on port 8501:8501
 dev_streamlit = Streamlit(
     name=f"{ws_settings.dev_key}-app",
@@ -87,9 +71,25 @@ dev_streamlit = Streamlit(
     depends_on=[dev_db],
 )
 
+# -*- FastApi running on port 8000:8000
+dev_fastapi = FastApi(
+    name=f"{ws_settings.dev_key}-api",
+    enabled=ws_settings.dev_api_enabled,
+    image=dev_image,
+    command="uvicorn api.main:app --reload",
+    port_number=8000,
+    debug_mode=True,
+    mount_workspace=True,
+    env_vars=container_env,
+    use_cache=ws_settings.use_cache,
+    # Read secrets from secrets/dev_app_secrets.yml
+    secrets_file=ws_settings.ws_root.joinpath("workspace/secrets/dev_app_secrets.yml"),
+    depends_on=[dev_db],
+)
+
 # -*- Dev DockerResources
 dev_docker_resources = DockerResources(
     env=ws_settings.dev_env,
     network=ws_settings.ws_name,
-    apps=[dev_db, dev_fastapi, dev_streamlit, dev_jupyter_app],
+    apps=[dev_db, dev_streamlit, dev_fastapi, dev_jupyter_app],
 )

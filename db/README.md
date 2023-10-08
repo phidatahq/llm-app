@@ -2,8 +2,8 @@
 
 Steps to create/update the database using alembic:
 
-1. Add/update your tables in the `db/tables` directory.
-2. Import the table in the `db/tables/__init__.py` file.
+1. Add/update SqlAlchemy tables in the `db/tables` directory.
+2. Import the SqlAlchemy class in the `db/tables/__init__.py` file.
 3. Create a database revision using: `alembic -c db/alembic.ini revision --autogenerate -m "Revision Name"`
 4. Upgrade database using: `alembic -c db/alembic.ini upgrade head`
 
@@ -36,8 +36,8 @@ alembic -c db/alembic.ini upgrade head
 
 ```bash
 ECS_CLUSTER=llm-prd-cluster
-TASK_ARN=$(aws ecs list-tasks --cluster phi-api-prd --query "taskArns[0]" --output text)
-CONTAINER_NAME=llm-prd
+TASK_ARN=$(aws ecs list-tasks --cluster llm-prd-cluster --query "taskArns[0]" --output text)
+CONTAINER_NAME=llm-prd-api
 
 aws ecs execute-command --cluster $ECS_CLUSTER \
     --task $TASK_ARN \

@@ -10,7 +10,7 @@ pdf_knowledge_base = PDFUrlKnowledgeBase(
     ],
     # Table name: llm.pdf_documents
     vector_db=PgVector(
-        collection="recipes",
+        collection="pdf_documents",
         db_url=db_url,
         schema="llm",
     ),
@@ -25,7 +25,6 @@ pdf_knowledge_base = PDFUrlKnowledgeBase(
 #         db_url=db_url,
 #         schema="llm",
 #     ),
-#     reader=PDFReader(chunk=False),
 # )
 
 website_knowledge_base = WebsiteKnowledgeBase(

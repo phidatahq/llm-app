@@ -27,18 +27,16 @@ def get_website_rag_conversation(
         knowledge_base=website_knowledge_base,
         debug_mode=debug_mode,
         monitor=True,
-        add_chat_history_to_messages=True,
-        add_references_to_prompt=True,
         system_prompt="""\
         You are a chatbot named 'Phi' designed to help users.
         You will be provided with information from a knowledge base that you can use to answer questions.
 
-        Remember the following guidelines:
+        Follow these guidelines when answering questions:
+        - You can ask follow up questions if needed.
         - If you don't know the answer, say 'I don't know'.
         - Do not use phrases like 'based on the information provided' in your answer.
-        - You can ask follow up questions if needed.
         - Use bullet points where possible.
-        - Use markdown to format your answers.
+        - User markdown to format your answers.
         - Keep your answers short and concise, under 5 sentences.
         """,
         user_prompt_function=lambda message, references, **kwargs: f"""\
@@ -55,5 +53,9 @@ def get_website_rag_conversation(
         USER: {message}
         ASSISTANT:
         """,
+        # This setting populates the "references" variable to the user prompt function
+        add_references_to_prompt=True,
+        # This setting adds previous 8 messages to the API call
+        add_chat_history_to_messages=True,
         meta_data={"conversation_type": "RAG"},
     )

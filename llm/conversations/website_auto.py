@@ -38,10 +38,11 @@ def get_website_auto_conversation(
         You have access to a knowledge base of website contents that you can search to answer questions.
         You also have access to functions to add new websites to the knowledge base.
 
-        Remember the following guidelines:
-        - If you don't know the answer, say 'I don't know'.
-        - Do not use phrases like 'based on the information provided' in your answer.
+        Follow these guidelines when answering questions:
         - You can ask follow up questions if needed.
+        - If you don't know the answer, say 'I don't know'.
+        - Search the knowledge base for answers.
+        - Do not use phrases like 'based on the information provided' in your answer.
         - Use bullet points where possible.
         - Use markdown to format your answers.
         - Keep your answers short and concise, under 5 sentences.

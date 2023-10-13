@@ -26,7 +26,7 @@ def get_website_rag_conversation(
         storage=website_conversation_storage,
         knowledge_base=website_knowledge_base,
         debug_mode=debug_mode,
-        monitor=True,
+        monitoring=True,
         system_prompt="""\
         You are a chatbot named 'Phi' designed to help users.
         You will be provided with information from a knowledge base that you can use to answer questions.

@@ -26,7 +26,7 @@ def get_pdf_auto_conversation(
         storage=pdf_conversation_storage,
         knowledge_base=pdf_knowledge_base,
         debug_mode=debug_mode,
-        monitor=True,
+        monitoring=True,
         function_calls=True,
         show_function_calls=True,
         system_prompt="""\

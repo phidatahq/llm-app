@@ -23,11 +23,8 @@ def restart_conversation():
 
 
 def main() -> None:
-    # Check if OpenAI API key is set
-    openai_key = get_openai_key()
-    if openai_key is None or openai_key == "" or openai_key == "sk-***":
-        st.write("🔑  OpenAI API key not set")
-        return
+    # Get users OpenAI API key
+    get_openai_key()
 
     # Get user name
     user_name = get_user_name()

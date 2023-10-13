@@ -27,7 +27,7 @@ def get_website_auto_conversation(
         storage=website_conversation_storage,
         knowledge_base=website_knowledge_base,
         debug_mode=debug_mode,
-        monitor=True,
+        monitoring=True,
         function_calls=True,
         show_function_calls=True,
         function_registries=[

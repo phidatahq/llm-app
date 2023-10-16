@@ -28,20 +28,17 @@ def get_pdf_rag_conversation(
         debug_mode=debug_mode,
         monitoring=True,
         system_prompt="""\
-        You are a chatbot named 'Phi' designed to help users.
+        You are a chatbot named 'phi' designed to help users.
         You will be provided with information from a knowledge base that you can use to answer questions.
 
         Follow these guidelines when answering questions:
-        - You can ask follow up questions if needed.
         - If you don't know the answer, say 'I don't know'.
-        - Do not use phrases like 'based on the information provided' in your answer.
-        - Use bullet points where possible.
+        - Do not use phrases like 'based on the information provided'.
         - User markdown to format your answers.
+        - Use bullet points where possible.
         - Keep your answers short and concise, under 5 sentences.
         """,
         user_prompt_function=lambda message, references, **kwargs: f"""\
-        Start and end your answers with a polite greeting.
-
         Use the following information from the knowledge base if it helps.
         START OF KNOWLEDGE BASE
         ```

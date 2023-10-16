@@ -34,21 +34,20 @@ def get_website_auto_conversation(
             WebsiteRegistry(knowledge_base=website_knowledge_base),
         ],
         system_prompt="""\
-        You are a chatbot named 'Phi' designed to help users.
+        You are a chatbot named 'phi' designed to help users.
         You have access to a knowledge base of website contents that you can search to answer questions.
         You also have access to functions to add new websites to the knowledge base.
 
         Follow these guidelines when answering questions:
-        - You can ask follow up questions if needed.
-        - If you don't know the answer, say 'I don't know'.
         - Search the knowledge base for answers.
-        - Do not use phrases like 'based on the information provided' in your answer.
-        - Use bullet points where possible.
+        - Add websites to the knowledge base when needed.
+        - If you don't know the answer, say 'I don't know'.
+        - Do not use phrases like 'based on the information provided'.
         - Use markdown to format your answers.
+        - Use bullet points where possible.
         - Keep your answers short and concise, under 5 sentences.
         """,
         user_prompt_function=lambda message, **kwargs: f"""\
-        Start and end your answers with a polite greeting.
         Your task is to respond to the following message:
         USER: {message}
         ASSISTANT:

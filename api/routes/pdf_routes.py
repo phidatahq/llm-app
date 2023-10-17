@@ -28,12 +28,22 @@ def get_conversation(
 
     if conversation_type == "RAG":
         return get_pdf_rag_conversation(
-            conversation_id=conversation_id, user_name=user_name
+            conversation_id=conversation_id, user_name=user_name, debug_mode=True
         )
     elif conversation_type == "AUTO":
         return get_pdf_auto_conversation(
-            conversation_id=conversation_id, user_name=user_name
+            conversation_id=conversation_id, user_name=user_name, debug_mode=True
         )
+
+
+@pdf_router.post("/load-knowledge-base")
+def load_knowledge_base():
+    """Loads the knowledge base for the PDF LLM"""
+
+    pdf_rag_conversation = get_pdf_rag_conversation()
+    if pdf_rag_conversation.knowledge_base:
+        pdf_rag_conversation.knowledge_base.load(recreate=False)
+    return {"message": "Knowledge base loaded"}
 
 
 class CreateConversationRequest(BaseModel):
@@ -83,7 +93,7 @@ class ChatRequest(BaseModel):
 
 @pdf_router.post("/chat")
 def chat(body: ChatRequest):
-    """Send a message to the PDF Conversation and return the response"""
+    """Send a message to the PDF LLM and return the response"""
 
     logger.debug(f"ChatRequest: {body}")
     conversation: Conversation = get_conversation(
@@ -217,7 +227,7 @@ class EndConversationRequest(BaseModel):
     conversation_type: ConversationType = "RAG"
 
 
-@pdf_router.post("/conversation/end", response_model=Optional[ConversationRow])
+@pdf_router.post("/end", response_model=Optional[ConversationRow])
 def end_conversation(body: EndConversationRequest):
     """End a conversation"""
 

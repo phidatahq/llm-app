@@ -29,7 +29,7 @@ storage
 # ignore dist dir
 dist
 
-# ignore common virtualenvs
+# ignore virtualenvs
 .venv
 venv*
 aienv*

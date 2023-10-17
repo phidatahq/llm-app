@@ -25,7 +25,7 @@ save_output: bool = True
 # Create load balancer for the application
 create_load_balancer: bool = True
 
-# -*- Production application image
+# -*- Production image
 prd_image = DockerImage(
     name=f"{ws_settings.image_repo}/{ws_settings.ws_name}",
     tag=ws_settings.prd_env,
@@ -148,7 +148,7 @@ prd_db = DbInstance(
     db_name="llm",
     engine=db_engine,
     port=prd_db_port,
-    engine_version="15.3",
+    engine_version="15.4-R2",
     allocated_storage=64,
     # NOTE: For production, use a larger instance type.
     # Last checked price: $0.0650 hourly = ~$50 per month

@@ -13,7 +13,7 @@ def get_website_rag_conversation(
     conversation_id: Optional[str] = None,
     debug_mode: bool = False,
 ) -> Conversation:
-    """Get an RAG conversation with the Website knowledge base"""
+    """Get a RAG conversation with the Website knowledge base"""
 
     return Conversation(
         id=conversation_id,

@@ -13,7 +13,7 @@ from workspace.settings import ws_settings
 # -*- Resources for the Development Environment
 #
 
-# -*- Dev application image
+# -*- Dev image
 dev_image = DockerImage(
     name=f"{ws_settings.image_repo}/{ws_settings.ws_name}",
     tag=ws_settings.dev_env,

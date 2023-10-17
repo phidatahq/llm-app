@@ -1,6 +1,6 @@
-## Add tables to the database
+## Running database migrations
 
-Steps to create/update the database using alembic:
+Steps to migrate the database using alembic:
 
 1. Add/update SqlAlchemy tables in the `db/tables` directory.
 2. Import the SqlAlchemy class in the `db/tables/__init__.py` file.
@@ -11,7 +11,7 @@ Steps to create/update the database using alembic:
 
 ## Creat a database revision using alembic
 
-SSH into the dev container to run the alembic command to create a database migration.
+SSH into the dev container and run the alembic command to create a database migration.
 
 ```bash
 docker exec -it llm-dev-api zsh
@@ -19,9 +19,9 @@ docker exec -it llm-dev-api zsh
 alembic -c db/alembic.ini revision --autogenerate -m "Initialize DB"
 ```
 
-## Upgrade development database
+## Migrate development database
 
-SSH into the dev container to run the alembic command to upgrade the database.
+SSH into the dev container and run the alembic command to migrate the database.
 
 ```bash
 docker exec -it llm-dev-api zsh
@@ -29,7 +29,7 @@ docker exec -it llm-dev-api zsh
 alembic -c db/alembic.ini upgrade head
 ```
 
-## Upgrade production database
+## Migrate production database
 
 1. Recommended: Set Env Var `MIGRATE_DB = True` which runs `alembic -c db/alembic.ini upgrade head` from the entrypoint script at container startup.
 2. **OR** you can SSH into the production container to run the migration manually

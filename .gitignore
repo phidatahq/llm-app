@@ -33,6 +33,7 @@ dist
 .venv
 venv*
 aienv*
+apienv*
 llmenv*
 
 .ipynb_checkpoints

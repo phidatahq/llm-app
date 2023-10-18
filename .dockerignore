@@ -22,10 +22,11 @@ Pipfile.lock
 .env
 .envrc
 
-# ignore common virtualenvs
+# ignore virtualenvs
 .venv
 venv*
 aienv*
+apienv*
 llmenv*
 
 .ipynb_checkpoints

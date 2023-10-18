@@ -148,7 +148,7 @@ prd_db = DbInstance(
     db_name="llm",
     engine=db_engine,
     port=prd_db_port,
-    engine_version="15.4-R2",
+    engine_version="15.4",
     allocated_storage=64,
     # NOTE: For production, use a larger instance type.
     # Last checked price: $0.0650 hourly = ~$50 per month

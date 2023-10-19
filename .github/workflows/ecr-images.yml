@@ -3,10 +3,9 @@ name: Build ECR Images
 on: workflow_dispatch
 
 permissions:
-  contents:
-    read
-    # For AWS OIDC Token access as per https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#updating-your-github-actions-workflow
-  id-token: write
+  # For AWS OIDC Token access as per https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#updating-your-github-actions-workflow
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 env:
   ECR_REPO: YOUR ECR REPO

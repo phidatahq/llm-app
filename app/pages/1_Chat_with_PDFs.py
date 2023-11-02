@@ -2,6 +2,7 @@ from typing import List
 
 import streamlit as st
 from phi.conversation import Conversation
+from phi.document import Document
 from phi.document.reader.pdf import PDFReader
 
 from app.openai_key import get_openai_key
@@ -19,6 +20,7 @@ st.title(":snowman: Chat with PDFs")
 def restart_conversation():
     st.session_state["pdf_conversation"] = None
     st.session_state["pdf_conversation_id"] = None
+    st.session_state["file_uploader_key"] += 1
     st.rerun()
 
 
@@ -79,27 +81,6 @@ def main() -> None:
             st.sidebar.success("Knowledge base loaded")
             loading_container.empty()
 
-    # Upload PDF
-    if pdf_conversation.knowledge_base:
-        if "file_uploader_key" not in st.session_state:
-            st.session_state["file_uploader_key"] = 0
-
-        uploaded_file = st.sidebar.file_uploader(
-            "Upload PDF",
-            type="pdf",
-            key=st.session_state["file_uploader_key"],
-        )
-        if uploaded_file is not None:
-            alert = st.sidebar.info("Processing PDF...", icon="ℹ️")
-            logger.info(f"PDF file uploaded: {uploaded_file.name}")
-            reader = PDFReader()
-            pdf_documents = reader.read(uploaded_file)
-            if pdf_documents:
-                pdf_conversation.knowledge_base.load_documents(pdf_documents)
-                alert.empty()
-            else:
-                st.sidebar.error("Could not read PDF")
-
     # Load messages for existing conversation
     user_chat_history = pdf_conversation.memory.get_chat_history()
     if len(user_chat_history) > 0:
@@ -140,15 +121,38 @@ def main() -> None:
         if st.sidebar.button("Update Knowledge Base"):
             pdf_conversation.knowledge_base.load(recreate=False)
             st.session_state["pdf_knowledge_base_loaded"] = True
-            st.sidebar.success("Knowledge Base Updated")
+            st.sidebar.success("Knowledge base updated")
 
         if st.sidebar.button("Recreate Knowledge Base"):
             pdf_conversation.knowledge_base.load(recreate=True)
             st.session_state["pdf_knowledge_base_loaded"] = True
-            st.sidebar.success("Knowledge Base Recreated")
+            st.sidebar.success("Knowledge base recreated")
 
     if st.sidebar.button("Auto Rename"):
         pdf_conversation.auto_rename()
+
+    # Upload PDF
+    if pdf_conversation.knowledge_base:
+        if "file_uploader_key" not in st.session_state:
+            st.session_state["file_uploader_key"] = 0
+
+        uploaded_file = st.sidebar.file_uploader(
+            "Upload PDF",
+            type="pdf",
+            key=st.session_state["file_uploader_key"],
+        )
+        if uploaded_file is not None:
+            alert = st.sidebar.info("Processing PDF...", icon="ℹ️")
+            pdf_name = uploaded_file.name.split(".")[0]
+            if f"{pdf_name}_uploaded" not in st.session_state:
+                reader = PDFReader()
+                pdf_documents: List[Document] = reader.read(uploaded_file)
+                if pdf_documents:
+                    pdf_conversation.knowledge_base.load_documents(pdf_documents)
+                else:
+                    st.sidebar.error("Could not read PDF")
+                st.session_state[f"{pdf_name}_uploaded"] = True
+            alert.empty()
 
     if pdf_conversation.storage:
         all_pdf_conversation_ids: List[str] = pdf_conversation.storage.get_all_conversation_ids(

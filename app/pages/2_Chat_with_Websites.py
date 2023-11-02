@@ -78,20 +78,7 @@ def main() -> None:
             st.sidebar.success("Knowledge Base loaded")
             loading_container.empty()
 
-    # Add websites to knowledge base
-    website_knowledge_base: WebsiteKnowledgeBase = website_conversation.knowledge_base  # type: ignore
-    if website_knowledge_base:
-        website_url = st.sidebar.text_input("Add Website to Knowledge Base")
-        if website_url != "":
-            if website_url not in website_knowledge_base.urls:
-                website_knowledge_base.urls.append(website_url)
-                loading_container = st.sidebar.info(f"🧠 Loading {website_url}")
-                website_knowledge_base.load()
-                st.session_state["website_knowledge_base_loaded"] = True
-                st.sidebar.success("Knowledge Base loaded")
-                loading_container.empty()
-
-    # Load messages if this is not a new conversation
+    # Load messages for existing conversation
     user_chat_history = website_conversation.memory.get_chat_history()
     if len(user_chat_history) > 0:
         logger.debug("Loading chat history")
@@ -104,7 +91,7 @@ def main() -> None:
     if prompt := st.chat_input():
         st.session_state["messages"].append({"role": "user", "content": prompt})
 
-    # Display the existing chat messages
+    # Display existing chat messages
     for message in st.session_state["messages"]:
         if message["role"] == "system":
             continue
@@ -131,15 +118,27 @@ def main() -> None:
         if st.sidebar.button("Update Knowledge Base"):
             website_conversation.knowledge_base.load(recreate=False)
             st.session_state["knowledge_base_exists"] = True
-            st.sidebar.success("Knowledge Base Updated")
+            st.sidebar.success("Knowledge base updated")
 
         if st.sidebar.button("Recreate Knowledge Base"):
             website_conversation.knowledge_base.load(recreate=True)
             st.session_state["knowledge_base_exists"] = True
-            st.sidebar.success("Knowledge Base Recreated")
+            st.sidebar.success("Knowledge base recreated")
 
     if st.sidebar.button("Auto Rename"):
         website_conversation.auto_rename()
+
+    # Add websites to knowledge base
+    website_knowledge_base: WebsiteKnowledgeBase = website_conversation.knowledge_base  # type: ignore
+    if website_knowledge_base:
+        website_url = st.sidebar.text_input("Add Website to Knowledge Base")
+        if website_url != "":
+            if website_url not in website_knowledge_base.urls:
+                website_knowledge_base.urls.append(website_url)
+                loading_container = st.sidebar.info(f"🧠 Loading {website_url}")
+                website_knowledge_base.load()
+                st.session_state["website_knowledge_base_loaded"] = True
+                loading_container.empty()
 
     if website_conversation.storage:
         all_website_conversation_ids: List[str] = website_conversation.storage.get_all_conversation_ids(

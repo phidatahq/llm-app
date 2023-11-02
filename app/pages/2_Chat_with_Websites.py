@@ -35,9 +35,7 @@ def main() -> None:
         return
 
     # Get conversation type
-    website_conversation_type = st.sidebar.selectbox(
-        "Conversation Type", options=["RAG", "Autonomous"]
-    )
+    website_conversation_type = st.sidebar.selectbox("Conversation Type", options=["RAG", "Autonomous"])
     # Set conversation_type in session state
     if "website_conversation_type" not in st.session_state:
         st.session_state["website_conversation_type"] = website_conversation_type
@@ -48,10 +46,7 @@ def main() -> None:
 
     # Get the conversation
     website_conversation: Conversation
-    if (
-        "website_conversation" not in st.session_state
-        or st.session_state["website_conversation"] is None
-    ):
+    if "website_conversation" not in st.session_state or st.session_state["website_conversation"] is None:
         if st.session_state["website_conversation_type"] == "Autonomous":
             logger.info("---*--- Creating Autonomous Conversation ---*---")
             website_conversation = get_website_auto_conversation(
@@ -103,9 +98,7 @@ def main() -> None:
         st.session_state["messages"] = user_chat_history
     else:
         logger.debug("No chat history found")
-        st.session_state["messages"] = [
-            {"role": "assistant", "content": "Ask me anything..."}
-        ]
+        st.session_state["messages"] = [{"role": "assistant", "content": "Ask me anything..."}]
 
     # Prompt for user input
     if prompt := st.chat_input():
@@ -129,9 +122,7 @@ def main() -> None:
                 response += delta
                 resp_container.markdown(response)
 
-            st.session_state["messages"].append(
-                {"role": "assistant", "content": response}
-            )
+            st.session_state["messages"].append({"role": "assistant", "content": response})
 
     if st.sidebar.button("New Conversation"):
         restart_conversation()
@@ -151,9 +142,9 @@ def main() -> None:
         website_conversation.auto_rename()
 
     if website_conversation.storage:
-        all_website_conversation_ids: List[
-            str
-        ] = website_conversation.storage.get_all_conversation_ids(user_name=user_name)
+        all_website_conversation_ids: List[str] = website_conversation.storage.get_all_conversation_ids(
+            user_name=user_name
+        )
         new_website_conversation_id = st.sidebar.selectbox(
             "Conversation ID", options=all_website_conversation_ids
         )
@@ -161,9 +152,7 @@ def main() -> None:
             logger.debug(f"Loading conversation {new_website_conversation_id}")
             if st.session_state["website_conversation_type"] == "Autonomous":
                 logger.info("---*--- Loading as Autonomous Conversation ---*---")
-                st.session_state[
-                    "website_conversation"
-                ] = get_website_auto_conversation(
+                st.session_state["website_conversation"] = get_website_auto_conversation(
                     user_name=user_name,
                     conversation_id=new_website_conversation_id,
                     debug_mode=True,

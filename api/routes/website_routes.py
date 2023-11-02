@@ -166,9 +166,7 @@ def get_conversation_ids(body: GetAllConversationIdsRequest):
     """Return all conversation_ids for a user"""
 
     logger.debug(f"GetAllConversationIdsRequest: {body}")
-    return website_conversation_storage.get_all_conversation_ids(
-        user_name=body.user_name
-    )
+    return website_conversation_storage.get_all_conversation_ids(user_name=body.user_name)
 
 
 class RenameConversationRequest(BaseModel):

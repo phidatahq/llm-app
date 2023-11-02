@@ -2,6 +2,7 @@ from typing import List
 
 import streamlit as st
 from phi.conversation import Conversation
+from phi.document.reader.pdf import PDFReader
 
 from app.openai_key import get_openai_key
 from app.password import check_password
@@ -34,9 +35,7 @@ def main() -> None:
         return
 
     # Get conversation type
-    pdf_conversation_type = st.sidebar.selectbox(
-        "Conversation Type", options=["RAG", "Autonomous"]
-    )
+    pdf_conversation_type = st.sidebar.selectbox("Conversation Type", options=["RAG", "Autonomous"])
     # Set conversation_type in session state
     if "pdf_conversation_type" not in st.session_state:
         st.session_state["pdf_conversation_type"] = pdf_conversation_type
@@ -47,10 +46,7 @@ def main() -> None:
 
     # Get the conversation
     pdf_conversation: Conversation
-    if (
-        "pdf_conversation" not in st.session_state
-        or st.session_state["pdf_conversation"] is None
-    ):
+    if "pdf_conversation" not in st.session_state or st.session_state["pdf_conversation"] is None:
         if st.session_state["pdf_conversation_type"] == "Autonomous":
             logger.info("---*--- Creating Autonomous Conversation ---*---")
             pdf_conversation = get_pdf_auto_conversation(
@@ -76,11 +72,33 @@ def main() -> None:
         or not st.session_state["pdf_knowledge_base_loaded"]
     ):
         if not pdf_conversation.knowledge_base.exists():
+            logger.info("Knowledge base does not exist")
             loading_container = st.sidebar.info("🧠 Loading knowledge base")
             pdf_conversation.knowledge_base.load()
             st.session_state["pdf_knowledge_base_loaded"] = True
             st.sidebar.success("Knowledge Base loaded")
             loading_container.empty()
+
+    # Upload PDF
+    if pdf_conversation.knowledge_base:
+        if "file_uploader_key" not in st.session_state:
+            st.session_state["file_uploader_key"] = 0
+
+        uploaded_file = st.sidebar.file_uploader(
+            "Upload PDF",
+            type="pdf",
+            key=st.session_state["file_uploader_key"],
+        )
+        if uploaded_file is not None:
+            alert = st.sidebar.info("Processing PDF...", icon="ℹ️")
+            logger.info(f"PDF file uploaded: {uploaded_file.name}")
+            reader = PDFReader()
+            pdf_documents = reader.read(uploaded_file)
+            if pdf_documents:
+                pdf_conversation.knowledge_base.load_documents(pdf_documents)
+                alert.empty()
+            else:
+                st.sidebar.error("Could not read PDF")
 
     # Load messages for existing conversation
     user_chat_history = pdf_conversation.memory.get_chat_history()
@@ -89,9 +107,7 @@ def main() -> None:
         st.session_state["messages"] = user_chat_history
     else:
         logger.debug("No chat history found")
-        st.session_state["messages"] = [
-            {"role": "assistant", "content": "Ask me anything..."}
-        ]
+        st.session_state["messages"] = [{"role": "assistant", "content": "Ask me anything..."}]
 
     # Prompt for user input
     if prompt := st.chat_input():
@@ -115,9 +131,7 @@ def main() -> None:
                 response += delta
                 resp_container.markdown(response)
 
-            st.session_state["messages"].append(
-                {"role": "assistant", "content": response}
-            )
+            st.session_state["messages"].append({"role": "assistant", "content": response})
 
     if st.sidebar.button("New Conversation"):
         restart_conversation()
@@ -137,12 +151,10 @@ def main() -> None:
         pdf_conversation.auto_rename()
 
     if pdf_conversation.storage:
-        all_pdf_conversation_ids: List[
-            str
-        ] = pdf_conversation.storage.get_all_conversation_ids(user_name=user_name)
-        new_pdf_conversation_id = st.sidebar.selectbox(
-            "Conversation ID", options=all_pdf_conversation_ids
+        all_pdf_conversation_ids: List[str] = pdf_conversation.storage.get_all_conversation_ids(
+            user_name=user_name
         )
+        new_pdf_conversation_id = st.sidebar.selectbox("Conversation ID", options=all_pdf_conversation_ids)
         if st.session_state["pdf_conversation_id"] != new_pdf_conversation_id:
             logger.debug(f"Loading conversation {new_pdf_conversation_id}")
             if st.session_state["pdf_conversation_type"] == "Autonomous":

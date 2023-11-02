@@ -87,6 +87,9 @@ dev_fastapi = FastApi(
     depends_on=[dev_db],
 )
 
+# -*- Update jupyter environment variables
+dev_jupyter_app.env_vars = container_env
+
 # -*- Dev DockerResources
 dev_docker_resources = DockerResources(
     env=ws_settings.dev_env,

@@ -76,7 +76,7 @@ def main() -> None:
             loading_container = st.sidebar.info("🧠 Loading knowledge base")
             pdf_conversation.knowledge_base.load()
             st.session_state["pdf_knowledge_base_loaded"] = True
-            st.sidebar.success("Knowledge Base loaded")
+            st.sidebar.success("Knowledge base loaded")
             loading_container.empty()
 
     # Upload PDF

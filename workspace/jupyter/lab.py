@@ -1,5 +1,3 @@
-from os import getenv
-
 from phi.docker.app.jupyter import Jupyter
 from phi.docker.resource.image import DockerImage
 

@@ -50,7 +50,7 @@ def get_pdf_rag_conversation(
         """,
         # This setting populates the "references" variable to the user prompt function
         add_references_to_prompt=True,
-        # This setting adds previous 8 messages to the API call
+        # This setting adds the last 8 messages to the API call
         add_chat_history_to_messages=True,
         meta_data={"conversation_type": "RAG"},
     )

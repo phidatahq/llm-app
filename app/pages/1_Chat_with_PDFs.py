@@ -94,7 +94,7 @@ def main() -> None:
     if prompt := st.chat_input():
         st.session_state["messages"].append({"role": "user", "content": prompt})
 
-    # Display the existing chat messages
+    # Display existing chat messages
     for message in st.session_state["messages"]:
         if message["role"] == "system":
             continue

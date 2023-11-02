@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  build-dev-image:
+  build-app-image:
     runs-on: ubuntu-latest
 
     steps:

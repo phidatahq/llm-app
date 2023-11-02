@@ -14,7 +14,7 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  build-dev-image:
+  build-app-image:
     runs-on: ubuntu-latest
 
     steps:

@@ -9,7 +9,7 @@ This repo contains the code for running an LLM App in 2 environments:
 
 1. Clone the git repo
 
-> in the `llm-app` dir:
+> from the `llm-app` dir:
 
 2. Create + activate a virtual env:
 
@@ -65,6 +65,12 @@ phi ws up
 - Open [localhost:8501](http://localhost:8501) to view the Streamlit App.
 - Open [localhost:8000/docs](http://localhost:8000/docs) to view the FastApi docs.
 - If Jupyter is enabled, open [localhost:8888](http://localhost:8888) to view JupyterLab UI.
+
+4. Stop the workspace using:
+
+```sh
+phi ws down
+```
 
 ## Next Steps:
 

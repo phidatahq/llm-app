@@ -7,8 +7,8 @@ from phi.aws.resource.ecs import EcsCluster
 from phi.aws.resource.ec2 import SecurityGroup, InboundRule
 from phi.aws.resource.rds import DbInstance, DbSubnetGroup
 from phi.aws.resource.reference import AwsReference
-from phi.aws.resource.s3.bucket import S3Bucket
-from phi.aws.resource.secret.manager import SecretsManager
+from phi.aws.resource.s3 import S3Bucket
+from phi.aws.resource.secret import SecretsManager
 from phi.docker.resources import DockerResources
 from phi.docker.resource.image import DockerImage
 

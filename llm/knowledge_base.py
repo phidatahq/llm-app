@@ -38,7 +38,7 @@ pdf_knowledge_base = CombinedKnowledgeBase(
         db_url=db_url,
         schema="llm",
     ),
-    num_documents=2,
+    num_documents=2, # 2 references are added to the prompt.
 )
 
 website_knowledge_base = WebsiteKnowledgeBase(

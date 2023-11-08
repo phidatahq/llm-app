@@ -22,6 +22,8 @@ dependencies = [
   "tiktoken",
   "beautifulsoup4",
   "types-beautifulsoup4",
+  "pillow",
+  "types-Pillow",
   # Type checking
   "mypy",
   # Testing
@@ -29,7 +31,7 @@ dependencies = [
   # Linting and Formatting
   "ruff",
   # phidata
-  "phidata==2.0.31",
+  "phidata==2.0.32",
 ]
 
 [build-system]

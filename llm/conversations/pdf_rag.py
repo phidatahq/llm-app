@@ -35,7 +35,6 @@ def get_pdf_rag_conversation(
         - If you don't know the answer, say 'I don't know'.
         - Do not use phrases like 'based on the information provided'.
         - User markdown to format your answers.
-        - Use bullet points where possible.
         - Keep your answers short and concise, under 5 sentences.
         """,
         user_prompt_function=lambda message, references, **kwargs: f"""\

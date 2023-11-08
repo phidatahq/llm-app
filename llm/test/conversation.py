@@ -1,7 +1,4 @@
 from phi.conversation import Conversation
-from phi.utils.log import set_log_level_to_debug
-
-set_log_level_to_debug()
 
 conversation = Conversation(monitoring=True)
 

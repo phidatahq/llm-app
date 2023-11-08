@@ -8,6 +8,12 @@ pdf_conversation_storage = PgConversationStorage(
     schema="llm",
 )
 
+vision_conversation_storage = PgConversationStorage(
+    table_name="vision_conversations",
+    db_url=db_url,
+    schema="llm",
+)
+
 website_conversation_storage = PgConversationStorage(
     table_name="website_conversations",
     db_url=db_url,

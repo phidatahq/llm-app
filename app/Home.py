@@ -14,7 +14,8 @@ st.title(":snowman: LLM Apps")
 def main() -> None:
     st.markdown("## Select App from the sidebar:")
     st.markdown("### 1. Chat with PDFs")
-    st.markdown("### 2. Chat with Websites")
+    st.markdown("### 2. Chat with Images")
+    st.markdown("### 3. Chat with Websites")
 
     st.sidebar.success("Select App from above")
 

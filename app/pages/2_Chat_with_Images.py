@@ -14,7 +14,7 @@ from llm.conversations.vision import get_vision_conversation
 from utils.log import logger
 
 
-st.title(":snowman: Chat with PDFs")
+st.title(":snowman: Chat with Images")
 
 
 def encode_image(image_file):

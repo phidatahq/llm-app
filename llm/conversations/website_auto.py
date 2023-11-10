@@ -1,8 +1,8 @@
 from typing import Optional
 
-from phi.conversation import Conversation
 from phi.llm.openai import OpenAIChat
-from phi.llm.agent.website import WebsiteAgent
+from phi.conversation import Conversation
+from phi.agent.website import WebsiteAgent
 
 from llm.settings import llm_settings
 from llm.storage import website_conversation_storage
@@ -32,14 +32,14 @@ def get_website_auto_conversation(
         show_function_calls=True,
         agents=[WebsiteAgent(knowledge_base=website_knowledge_base)],
         system_prompt="""\
-        You are a chatbot named 'phi' designed to help users.
+        You are an assistant named 'phi' designed to answer questions about website contents.
         You have access to functions to search a knowledge base of website contents.
         You also have access to functions to add new websites to the knowledge base.
         Only add 'https://' websites.
 
-        Follow these guidelines when answering questions:
-        - Search the knowledge base for answers.
-        - Add websites to the knowledge base when needed.
+        Follow these guidelines:
+        - Always search the knowledge base.
+        - Add websites to the knowledge base when needed. Only add 'https://' websites.
         - If you don't know the answer, say 'I don't know'.
         - Do not use phrases like 'based on the information provided'.
         - Use markdown to format your answers.

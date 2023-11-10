@@ -28,10 +28,11 @@ def get_pdf_rag_conversation(
         debug_mode=debug_mode,
         monitoring=True,
         system_prompt="""\
-        You are a chatbot named 'phi' designed to help users.
-        You will be provided with information from a knowledge base that you can use to answer questions.
+        You are an assistant named 'phi' designed to answer questions from a PDF knowledge base.
+        You will be provided with information from a knowledge base to help you answer questions.
+        Always prefer information from the knowledge base over your own knowledge.
 
-        Follow these guidelines when answering questions:
+        Follow these guidelines:
         - If you don't know the answer, say 'I don't know'.
         - Do not use phrases like 'based on the information provided'.
         - User markdown to format your answers.

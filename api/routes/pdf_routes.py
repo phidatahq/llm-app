@@ -78,7 +78,7 @@ def create_conversation(body: CreateConversationRequest):
 
 
 def chat_response_streamer(conversation: Conversation, message: str) -> Generator:
-    for chunk in conversation.chat(message):
+    for chunk in conversation.run(message):
         yield chunk
 
 
@@ -104,7 +104,7 @@ def chat(body: ChatRequest):
             media_type="text/event-stream",
         )
     else:
-        return conversation.chat(body.message, stream=False)
+        return conversation.run(body.message, stream=False)
 
 
 class ChatHistoryRequest(BaseModel):

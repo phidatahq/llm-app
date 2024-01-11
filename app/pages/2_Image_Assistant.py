@@ -14,7 +14,7 @@ from llm.conversations.vision import get_vision_conversation
 from utils.log import logger
 
 
-st.title(":snowman: Chat with Images")
+st.title(":snowman: Image Assistant")
 st.markdown('<a href="https://github.com/phidatahq/phidata"><h4>by phidata</h4></a>', unsafe_allow_html=True)
 
 

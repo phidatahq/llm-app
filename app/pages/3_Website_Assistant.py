@@ -13,7 +13,7 @@ from llm.conversations.website_rag import get_website_rag_conversation
 from utils.log import logger
 
 
-st.title(":snowman: Chat with Websites")
+st.title(":snowman: Website Assistant")
 st.markdown('<a href="https://github.com/phidatahq/phidata"><h4>by phidata</h4></a>', unsafe_allow_html=True)
 
 

@@ -14,7 +14,7 @@ from llm.conversations.pdf_rag import get_pdf_rag_conversation
 from utils.log import logger
 
 
-st.title(":snowman: Chat with PDFs")
+st.title(":snowman: PDF Assistant")
 st.markdown('<a href="https://github.com/phidatahq/phidata"><h4>by phidata</h4></a>', unsafe_allow_html=True)
 
 
